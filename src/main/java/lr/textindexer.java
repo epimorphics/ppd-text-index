@@ -16,26 +16,26 @@
  * limitations under the License.
  */
 
-package jena ;
+package lr ;
 
 import org.apache.jena.query.text.DatasetGraphText;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextDatasetFactory;
 import org.apache.jena.query.text.TextIndex;
-import org.apache.jena.query.text2.TextIndexer;
 import org.apache.jena.query.text.TextQuery;
 
 import arq.cmd.CmdException;
 import arq.cmdline.ArgDecl;
 import arq.cmdline.CmdARQ;
 
+import com.epimorphics.lr.jena.query.text.TextIndexer;
 import com.hp.hpl.jena.query.Dataset;
 
 /**
  * Text indexer application that will read a dataset and index its triples in
  * its text index.
  */
-public class textindexer2 extends CmdARQ {
+public class textindexer extends CmdARQ {
 
 //    private static Logger      log          = LoggerFactory.getLogger(textindexer.class) ;
 
@@ -48,14 +48,14 @@ public class textindexer2 extends CmdARQ {
     static public void main(String... argv) {
     	System.out.println("********** this is a new indexer ***********");
         TextQuery.init() ;
-        new textindexer2(argv).mainRun() ;
+        new textindexer(argv).mainRun() ;
     }
 
     static public void testMain(String... argv) {
-        new textindexer2(argv).mainMethod() ;
+        new textindexer(argv).mainMethod() ;
     }
 
-    protected textindexer2(String[] argv) {
+    protected textindexer(String[] argv) {
         super(argv) ;
         super.add(assemblerDescDecl, "--desc=", "Assembler description file") ;
     }

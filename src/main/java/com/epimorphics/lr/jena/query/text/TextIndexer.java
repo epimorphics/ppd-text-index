@@ -1,4 +1,4 @@
-package org.apache.jena.query.text2;
+package com.epimorphics.lr.jena.query.text;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -52,10 +52,9 @@ public class TextIndexer {
         textIndex.startIndexing() ;
 
         // this is a bit crude and does not scale
-        // there may be smarter structures
-        // could throw some or all of the contents away if we are running out of memory
-        //   that would result in multiple documents in the text index but would not be 'wrong'
-        // 
+        // Wouild be better to sort the list of subjects and then process in order
+        // its then easy to avoid duplicates
+        
         Set<GSPair> processed = new HashSet<GSPair>();
                 
         Iterator<Quad> quadIter = datasetGraph.find(Node.ANY, Node.ANY, Node.ANY, Node.ANY) ;
@@ -101,7 +100,7 @@ public class TextIndexer {
         return result ;
     }
     /**
-     * A class consisting of a pair of nodes, one a graph node, the other a subject.
+     * A class representing the md5 hash of a pair of nodes, one a graph node, the other a subject.
      * 
      * The graph node can be null, the subject node can't,
      *

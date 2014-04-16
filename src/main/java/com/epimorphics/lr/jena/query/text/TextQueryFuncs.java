@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.query.text2;
+package com.epimorphics.lr.jena.query.text;
 
 import org.apache.jena.atlas.logging.Log ;
 import org.apache.jena.query.text.Entity;
