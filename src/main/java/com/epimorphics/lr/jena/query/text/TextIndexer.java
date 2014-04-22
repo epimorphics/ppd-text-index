@@ -52,8 +52,9 @@ public class TextIndexer {
         textIndex.startIndexing() ;
 
         // this is a bit crude and does not scale
-        // Wouild be better to sort the list of subjects and then process in order
-        // its then easy to avoid duplicates
+        // options include
+        //	- replace add with update - will update same resource multiple times
+        //  - presort the quads and then do add - but this slower than current code
         
         Set<GSPair> processed = new HashSet<GSPair>();
                 
