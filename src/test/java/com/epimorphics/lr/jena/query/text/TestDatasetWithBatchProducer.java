@@ -116,7 +116,15 @@ public class TestDatasetWithBatchProducer {
 	@Test
 	public void testConfiguresBatchProducer() {
 		assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
-	}
+	}	
+	
+	@Test public void testEmptyUpdate() {
+		init();
+		dataset.begin(ReadWrite.WRITE);
+		dataset.getDefaultModel();
+		dataset.commit();
+		// we should not get any exceptions
+	}	
 	
 	@Test public void testSimpleQuery() {
 		init();

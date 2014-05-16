@@ -76,7 +76,6 @@ public class TextDocProducerBatch implements TextDocProducer {
     }
 
     public void change(QuadAction qaction, Node g, Node s, Node p, Node o) {
-        // One document per triple/quad
 
         if ( qaction != QuadAction.ADD )
             return ;
@@ -114,6 +113,10 @@ public class TextDocProducerBatch implements TextDocProducer {
     }
     
     private void addBatch() {
+    	if (subject == null) {
+    		// nothing to index
+    		return;
+    	}
         Entity entity = TextQueryFuncs.entity(defn, null, subject) ;
         int count = addQuads(batch.iterator(), entity);
         if (count == 0) {
