@@ -30,6 +30,7 @@
     <build.time.xsd>${maven.build.timestamp}</build.time.xsd>
     <ver.lucene>4.6.1</ver.lucene>
     <jdk.version>1.7</jdk.version>
+    <ver.wagon>1.0-beta-5</ver.wagon>
   </properties>
 
   <dependencies>
@@ -115,6 +116,14 @@
   </dependencies>
 
   <build>
+  
+  	<extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>${ver.wagon}</version>
+      </extension>
+    </extensions>
     
     <resources>
       <resource>
@@ -222,14 +231,22 @@
 
     </plugins>
     
-  </build>
+  </build>  
   
-  <repositories>
-  <repository>  
-   <id>maven-restlet</id>  
-   <name>Public online Restlet repository</name>  
-   <url>http://maven.restlet.org</url>  
-</repository> 
-  </repositories>
+  
+  <distributionManagement>
+    <repository> 
+      <id>ftp-repo-epi</id>
+      <url>ftp://ftp.epimorphics.org/</url>
+    </repository>
+  </distributionManagement>
+	  
+	  <repositories>
+		  <repository>  
+		   <id>maven-restlet</id>  
+		   <name>Public online Restlet repository</name>  
+		   <url>http://maven.restlet.org</url>  
+		  </repository> 
+	  </repositories>
 
 </project>
