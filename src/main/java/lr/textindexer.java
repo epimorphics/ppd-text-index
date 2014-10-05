@@ -46,7 +46,7 @@ public class textindexer extends CmdARQ {
     protected EntityDefinition entityDefinition ;
 
     static public void main(String... argv) {
-    	System.out.println("********** this is the customized text indexer for LR ***********");
+    	System.out.println("********** this is a new indexer ***********");
         TextQuery.init() ;
         new textindexer(argv).mainRun() ;
     }
