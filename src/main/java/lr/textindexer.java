@@ -28,6 +28,7 @@ import arq.cmd.CmdException;
 import arq.cmdline.ArgDecl;
 import arq.cmdline.CmdARQ;
 
+import com.epimorphics.lr.jena.query.text.ProgressMonitor;
 import com.epimorphics.lr.jena.query.text.TextIndexer;
 import com.hp.hpl.jena.query.Dataset;
 
@@ -105,7 +106,7 @@ public class textindexer extends CmdARQ {
     protected void exec() {
     	TextIndexer indexer = 
     			new TextIndexer(dataset);
-    	TextIndexer.ProgressMonitor pm = new TextIndexer.ProgressMonitor("properties indexed");
+    	ProgressMonitor pm = new ProgressMonitor("properties indexed");
     	indexer.index(pm);
     	pm.close();
     }
