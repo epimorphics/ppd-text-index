@@ -52,11 +52,11 @@ extends Entity
      * @param s Node denoting the subject resource
      */
     public ExtendedEntity( EntityDefinition defn, Node g, Node s ) {
-        super( TextQueryUtils.subjectToString( s ), TextQueryUtils.graphNodeToString( g ) );
+        super( NodeTermConverter.subjectToTerm( s ), NodeTermConverter.graphNodeToTerm( g ) );
 
         String graphField = defn.getGraphField();
         if (defn.getGraphField() != null)
-            put( graphField, TextQueryUtils.graphNodeToString( g ) );
+            put( graphField, NodeTermConverter.graphNodeToTerm( g ) );
     }
 
     /**
