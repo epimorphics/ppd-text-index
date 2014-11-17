@@ -23,6 +23,8 @@ import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextDatasetFactory;
 import org.apache.jena.query.text.TextIndex;
 import org.apache.jena.query.text.TextQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import arq.cmd.CmdException;
 import arq.cmdline.ArgDecl;
@@ -36,18 +38,20 @@ import com.hp.hpl.jena.query.Dataset;
  * Text indexer application that will read a dataset and index its triples in
  * its text index.
  */
-public class textindexer extends CmdARQ {
+public class textindexer
+    extends CmdARQ
+{
 
-//    private static Logger      log          = LoggerFactory.getLogger(textindexer.class) ;
+    private static Logger log = LoggerFactory.getLogger(textindexer.class) ;
 
     public static final ArgDecl assemblerDescDecl = new ArgDecl(ArgDecl.HasValue, "desc", "dataset") ;
-    
+
     protected DatasetGraphText dataset      = null ;
     protected TextIndex        textIndex    = null ;
     protected EntityDefinition entityDefinition ;
 
     static public void main(String... argv) {
-    	System.out.println("********** this is a new indexer ***********");
+        System.out.println("********** this is a new indexer ***********");
         TextQuery.init() ;
         new textindexer(argv).mainRun() ;
     }
@@ -67,22 +71,22 @@ public class textindexer extends CmdARQ {
         // Two forms : with and without arg.
         // Maximises similarity with other tools.
         String file ;
-        
+
         if ( ! super.contains(assemblerDescDecl) && getNumPositional() == 0 )
             throw new CmdException("No assembler description given") ;
-        
+
         if ( super.contains(assemblerDescDecl) ) {
             if ( getValues(assemblerDescDecl).size() != 1 )
                 throw new CmdException("Multiple assembler descriptions given via --desc") ;
             if ( getPositional().size() != 0 )
-                throw new CmdException("Additional assembler descriptions given") ; 
+                throw new CmdException("Additional assembler descriptions given") ;
             file = getValue(assemblerDescDecl) ;
         } else {
             if ( getNumPositional() != 1 )
                 throw new CmdException("Multiple assembler descriptions given as positional arguments") ;
             file = getPositionalArg(0) ;
         }
-        
+
         if (file == null)
             throw new CmdException("No dataset specified") ;
         // Assumes a single test dataset description in the assembler file.
@@ -104,10 +108,10 @@ public class textindexer extends CmdARQ {
 
     @Override
     protected void exec() {
-    	TextIndexer indexer = 
-    			new TextIndexer(dataset);
-    	ProgressMonitor pm = new ProgressMonitor("properties indexed");
-    	indexer.index(pm);
-    	pm.close();
+        TextIndexer indexer =
+                new TextIndexer(dataset);
+        ProgressMonitor pm = new ProgressMonitor("properties indexed", log );
+        indexer.index(pm);
+        pm.close();
     }
 }
