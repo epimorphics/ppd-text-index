@@ -3,95 +3,145 @@ package com.epimorphics.lr.jena.query.text;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.Quad;
 
+/**
+ * Supervisor object for the process of creating a new text index for
+ * a given dataset or graph.
+ */
 public class TextIndexer
 {
+    /** The dataset graph we are processing */
+    private DatasetGraphText datasetGraph;
 
-    static Logger log = LoggerFactory.getLogger( TextIndexer.class );
+    /** There may already be a standard label for this, but if there is I can' find it */
+    private static final Node NULL_GRAPH_LABEL = NodeFactory.createURI( "____NULL" );
 
-    protected Dataset dataset = null;
-    protected DatasetGraphText datasetGraph = null;
-    protected TextIndex textIndex = null;
-    protected EntityDefinition entityDefinition;
+    /** Multi-level map of graphs and subjects we have created index terms for */
+    private Map<Node,Set<Node>> indexed = new HashMap<Node, Set<Node>>();
 
+    /**
+     * Create an indexer for the given dataset
+     * @param dataset A dataset to index
+     * @throws TextIndexException if the dataset does not have an associated text index
+     */
     public TextIndexer( Dataset dataset ) {
-        this.dataset = dataset;
-        this.datasetGraph = (DatasetGraphText) dataset.asDatasetGraph();
-        this.textIndex = datasetGraph.getTextIndex();
-        if (textIndex == null)
+        if (!(dataset.asDatasetGraph() instanceof DatasetGraphText)) {
+            throw new TextIndexException( "Cannot index a Dataset that does not have a text index" );
+        }
+        if (this.datasetGraph.getTextIndex() == null) {
             throw new TextIndexException( "Dataset has no text index" );
-        entityDefinition = textIndex.getDocDef();
+        }
+
+        this.datasetGraph = (DatasetGraphText) dataset.asDatasetGraph();
     }
 
+    /**
+     * Create a text index for the given dataset graph
+     * @param datasetGraph
+     */
     public TextIndexer( DatasetGraphText datasetGraph ) {
         this.datasetGraph = datasetGraph;
-        this.dataset = DatasetFactory.create( datasetGraph );
-        this.textIndex = datasetGraph.getTextIndex();
-        entityDefinition = textIndex.getDocDef();
     }
 
-    public void index( ProgressMonitor progressMonitor ) {
+    /**
+     * Perform the indexing of the graph/subject pairs in the {@link DatasetGraph}
+     * that this indexer was constructed with.
+     *
+     * @param pm If non-null, report incremental progress
+     */
+    public void index( ProgressMonitor pm ) {
+        TextIndex textIndex = currentTextIndex( datasetGraph );
+        EntityDefinition entityDefinition = textIndex.getDocDef();
 
         textIndex.startIndexing();
 
-        // this is a bit crude and does not scale
-        // options include
-        // - replace add with update - will update same resource multiple times
-        // - presort the quads and then do add - but this slower than current
-        // code
-
-        Set<GSPair> processed = new HashSet<GSPair>();
-
         Iterator<Quad> quadIter = datasetGraph.find( Node.ANY, Node.ANY, Node.ANY, Node.ANY );
-        for (; quadIter.hasNext();) {
+        while (quadIter.hasNext()) {
             Quad quad = quadIter.next();
-            GSPair gs = new GSPair( quad.getGraph(), quad.getSubject() );
-            if (processed.contains( gs ))
-                continue; // already done this one.
-            processed.add( gs );
-            ExtendedEntity entity = new ExtendedEntity( entityDefinition, quad.getGraph(), quad.getSubject() );
-            int count = addFieldsToEntity( entity, quad.getGraph(), quad.getSubject() );
-            if (count > 0) {
-                textIndex.addEntity( entity );
-                if (progressMonitor != null) {
-                    progressMonitor.progressByN( count );
-                }
+            Node g = quad.getGraph();
+            Node s = quad.getSubject();
+
+            if (!seen( g, s )) {
+                indexSubject( entityDefinition, g, s, textIndex, pm );
             }
         }
+
         textIndex.finishIndexing();
     }
 
-    // find all the properties of the of the subject in the graph
-    // that are indexed and add them to the entity
+    /**
+     * @return The current text index
+     * @param g The current dataset graph
+     */
+    protected TextIndex currentTextIndex( DatasetGraphText g ) {
+        return g.getTextIndex();
+    }
 
-    private int addFieldsToEntity( ExtendedEntity entity, Node graph, Node subject ) {
+    /**
+     * Return true if pair graph g and node s have already been seen
+     * @param g A node denoting a graph, or null
+     * @param s A node denoting a subject
+     * @return True if we have already processed g-s as a pair
+     */
+    protected boolean seen( Node g, Node s ) {
+        boolean _seen = false;
+        Node _g = (g == null) ? NULL_GRAPH_LABEL : g;
+
+        Set<Node> subjects = indexed.get( _g );
+
+        if (subjects == null) {
+            indexed.put( _g, new HashSet<Node>() );
+        }
+        else {
+            _seen = subjects.contains( s );
+        }
+
+        return _seen;
+    }
+
+    /**
+     * Mark the pair of graph g and subject s as seen
+     * @param g A node denoting a graph, or null
+     * @param s A node denoting a subject
+     */
+    protected void see( Node g, Node s ) {
+        Node _g = (g == null) ? NULL_GRAPH_LABEL : g;
+        indexed.get( _g ).add( s );
+    }
+
+    /**
+     * Create index entries for the properties of subject s in graph g, then mark
+     * that pair as seen.
+     *
+     * @param def The text entity definition
+     * @param g The current graph
+     * @param s The current subject
+     * @param index The current text index
+     * @param pm Optional progress monitor
+     */
+    protected void indexSubject( EntityDefinition def, Node g, Node s, TextIndex index, ProgressMonitor pm ) {
+        ExtendedEntity entity = new ExtendedEntity( def, g, s );
         int count = 0;
-        Iterator<Quad> iter = datasetGraph.find( graph, subject, null, null );
-        for (; iter.hasNext();) {
-            Quad quad = iter.next();
-            boolean added = entity.addProperty( entityDefinition, quad.getPredicate(), quad.getObject() );
-            if (added) {
+
+        for (Iterator<Quad> i = datasetGraph.find( g, s, null, null ); i.hasNext();) {
+            Quad quad = i.next();
+            if (entity.addProperty( def, quad.getPredicate(), quad.getObject() )) {
                 count++;
             }
         }
-        return count;
-    }
 
-    // TODO remove
-//    private List<Node> getIndexedProperties() {
-//        List<Node> result = new ArrayList<Node>();
-//        for (String f : entityDefinition.fields()) {
-//            for (Node p : entityDefinition.getPredicates( f ))
-//                result.add( p );
-//        }
-//        return result;
-//    }
+        if (count > 0) {
+            index.addEntity( entity );
+            if (pm != null) {
+                pm.progressByN( count );
+            }
+        }
+    }
 
 }
