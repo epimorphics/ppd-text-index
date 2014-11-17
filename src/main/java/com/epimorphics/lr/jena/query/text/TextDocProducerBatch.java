@@ -25,17 +25,19 @@ import org.apache.jena.query.text.*;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.*;
 
-// this producer class batches up consecutive sequences of quads with the
-// same subject to add to the index as a single entity. It will also
-// include in that entity existing properties of that subject in the
-// triple store.
-
-public class TextDocProducerBatch implements TextDocProducer
+/**
+ * this producer class batches up consecutive sequences of quads with the
+ * same subject to add to the index as a single entity. It will also
+ *  include in that entity existing properties of that subject in the
+ * triple store.
+ */
+public class TextDocProducerBatch
+    implements TextDocProducer
 {
     private EntityDefinition defn;
     private TextIndex indexer;
     private DatasetGraph dsg;
-    private boolean started = false;
+    private boolean started;
 
     List<Quad> batch;
     Node subject;
@@ -118,7 +120,7 @@ public class TextDocProducerBatch implements TextDocProducer
         count += addQuads( dsg.find( null, subject, null, null ), entity );
 
         if (count > 0) {
-            // TODO indexer.updateEntity( entity );
+            indexer.updateEntity( entity );
         }
     }
 

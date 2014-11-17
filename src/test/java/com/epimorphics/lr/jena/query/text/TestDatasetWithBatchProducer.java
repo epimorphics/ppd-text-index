@@ -115,8 +115,7 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testConfiguresBatchProducer() {
-        assertTrue( false );
-        // TODO assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
+        assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
     }
 
     @Test public void testEmptyUpdate() {
