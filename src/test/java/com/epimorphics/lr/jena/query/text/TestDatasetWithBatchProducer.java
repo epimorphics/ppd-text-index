@@ -32,7 +32,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
- * This class defines a setup configuration for a dataset that specifies a non-default document producer.
+ * Unit tests for a dataset that specifies a non-default document producer.
  */
 public class TestDatasetWithBatchProducer {
     private static final String INDEX_PATH = "target/test/TestDatasetWithLuceneIndex";
@@ -89,6 +89,7 @@ public class TestDatasetWithBatchProducer {
                     );
     }
 
+    @BeforeClass
     public static void init() {
         Reader reader = new StringReader(SPEC);
         Model specModel = ModelFactory.createDefaultModel();
@@ -100,17 +101,11 @@ public class TestDatasetWithBatchProducer {
         dataset = (Dataset) Assembler.general.open(root);
     }
 
-
+    @AfterClass
     public static void deleteOldFiles() {
-        if (indexDir.exists()) emptyAndDeleteDirectory(indexDir);
-    }
-
-    @BeforeClass public static void beforeClass() {
-        init();
-    }
-
-    @AfterClass public static void afterClass() {
-        deleteOldFiles();
+        if (indexDir.exists()) {
+            emptyAndDeleteDirectory(indexDir);
+        }
     }
 
     @Test
@@ -118,7 +113,8 @@ public class TestDatasetWithBatchProducer {
         assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
     }
 
-    @Test public void testEmptyUpdate() {
+    @Test
+    public void testEmptyUpdate() {
         init();
         dataset.begin(ReadWrite.WRITE);
         dataset.getDefaultModel();
@@ -126,7 +122,8 @@ public class TestDatasetWithBatchProducer {
         // we should not get any exceptions
     }
 
-    @Test public void testSimpleQuery() {
+    @Test
+    public void testSimpleQuery() {
         init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
@@ -147,7 +144,8 @@ public class TestDatasetWithBatchProducer {
         doTestQuery(dataset, "testConjunctiveQueryAcrossFields", queryString, expected, 1);
     }
 
-    @Test public void testProducerSeparatesResources() {
+    @Test
+    public void testProducerSeparatesResources() {
         init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
@@ -155,12 +153,12 @@ public class TestDatasetWithBatchProducer {
                 model.createResource("http://example.com/testDatasetWithBatchProducer/testProducerSeparatesResources/1")
                      .addProperty(RDFS.label, "label1" )
                      .addProperty(RDFS.comment, "comment1" );
-        Resource subject2 =
-                model.createResource("http://example.com/testDatasetWithBatchProducer/testProducerSeparatesResources/1")
-                     .addProperty(RDFS.label, "label2" )
-                     .addProperty(RDFS.comment, "comment2" );
+        model.createResource("http://example.com/testDatasetWithBatchProducer/testProducerSeparatesResources/1")
+             .addProperty(RDFS.label, "label2" )
+             .addProperty(RDFS.comment, "comment2" );
         dataset.commit();
-        // now lets query the index
+
+        // now let's query the index
         String queryString = StrUtils.strjoinNL(
                 "PREFIX rdfs: <" + RDFS.getURI() + ">",
                 "PREFIX text: <http://jena.apache.org/text#>",
@@ -172,7 +170,8 @@ public class TestDatasetWithBatchProducer {
         doTestQuery(dataset, "testConjunctiveQueryAcrossFields", queryString, expected, 1);
     }
 
-    @Test public void testConjunctiveQueryAcrossFields() {
+    @Test
+    public void testConjunctiveQueryAcrossFields() {
         init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
@@ -193,7 +192,8 @@ public class TestDatasetWithBatchProducer {
         doTestQuery(dataset, "testConjunctiveQueryAcrossFields", queryString, expected, 1);
     }
 
-    @Test public void testProducerMergesExistingProperties() {
+    @Test
+    public void testProducerMergesExistingProperties() {
         init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
@@ -203,11 +203,9 @@ public class TestDatasetWithBatchProducer {
         dataset.commit();
 
         dataset.begin(ReadWrite.WRITE);
-        Resource subject2 =
-                model.createResource("http://example.com/testDatasetWithBatchProducer/ConjunctiveQueryAccossFields")
-                     .addProperty(RDFS.label, "label2" );
+        model.createResource("http://example.com/testDatasetWithBatchProducer/ConjunctiveQueryAccossFields")
+             .addProperty(RDFS.label, "label2" );
         dataset.commit();
-
 
         dataset.begin(ReadWrite.WRITE);
         subject1.addProperty(RDFS.comment, "comment1" );
@@ -239,7 +237,7 @@ public class TestDatasetWithBatchProducer {
         dir.delete() ;
     }
 
-    public static void doTestQuery(Dataset dataset, String label, String queryString, Set<String> expectedEntityURIs, int expectedNumResults) {
+    private static void doTestQuery(Dataset dataset, String label, String queryString, Set<String> expectedEntityURIs, int expectedNumResults) {
         Query query = QueryFactory.create(queryString) ;
         QueryExecution qexec = QueryExecutionFactory.create(query, dataset) ;
         try {

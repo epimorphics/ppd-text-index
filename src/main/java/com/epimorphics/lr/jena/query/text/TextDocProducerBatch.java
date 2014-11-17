@@ -21,30 +21,55 @@ package com.epimorphics.lr.jena.query.text;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.*;
 
 /**
- * this producer class batches up consecutive sequences of quads with the
- * same subject to add to the index as a single entity. It will also
- *  include in that entity existing properties of that subject in the
- * triple store.
+ * This document producer batches up consecutive sequences of quads with the
+ * same subject to add to the index as a single entity.
+ * To deal with subjects that do not present consecutively, we search the
+ * triple store for other triples with the same subject before updating the
+ * text entity.
  */
 public class TextDocProducerBatch
     implements TextDocProducer
 {
-    private EntityDefinition defn;
+    /***********************************/
+    /* Constants                       */
+    /***********************************/
+
+    /***********************************/
+    /* Static variables                */
+    /***********************************/
+
+    private static Logger log = LoggerFactory.getLogger( TextDocProducerBatch.class );
+
+    /***********************************/
+    /* Instance variables              */
+    /***********************************/
+
     private TextIndex indexer;
     private DatasetGraph dsg;
     private boolean started;
 
-    List<Quad> batch;
-    Node subject;
+    List<Quad> queue = new ArrayList<Quad>();
+    Node currentSubject;
 
-    public void setDefn( EntityDefinition defn ) {
-        this.defn = defn;
+    /***********************************/
+    /* Constructors                    */
+    /***********************************/
+
+    public TextDocProducerBatch( DatasetGraph dsg, TextIndex textIndex ) {
+        this.dsg = dsg;
+        this.indexer = textIndex;
     }
+
+    /***********************************/
+    /* External signature methods      */
+    /***********************************/
 
     public void setTextIndex( TextIndex indexer ) {
         this.indexer = indexer;
@@ -54,12 +79,21 @@ public class TextDocProducerBatch
         this.dsg = dsg;
     }
 
+    /**
+     * @return The entity definition for the current indexer
+     */
+    public EntityDefinition entityDefinition() {
+        return indexer.getDocDef();
+    }
+
+    @Override
     public void start() {
         indexer.startIndexing();
         started = true;
         startNewBatch();
     }
 
+    @Override
     public void finish() {
         addBatch();
         startNewBatch();
@@ -67,72 +101,94 @@ public class TextDocProducerBatch
         started = false;
     }
 
+    @Override
     public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
-
-        if (qaction != QuadAction.ADD)
-            return;
-
         Quad quad = new Quad( g, s, p, o );
+        switch( qaction ) {
+            case ADD:
+                indexNewQuad( quad );
+                break;
+            case DELETE:
+                log.warn( "Saw change action DELETE, but ignoring it!" );
+                break;
+            case NO_ADD:
+                log.warn( "Saw change action NO_ADD, but ignoring it!" );
+                break;
+            case NO_DELETE:
+                log.warn( "Saw change action NO_DELETE, but ignoring it!" );
+                break;
+        }
+    }
 
-        if (subject == null) {
-            subject = s;
-            batch.add( quad );
+    /***********************************/
+    /* Internal implementation methods */
+    /***********************************/
+
+    protected void indexNewQuad( Quad quad ) {
+        if (currentSubject == null) {
+            currentSubject = quad.getSubject();
         }
-        else if (subject.equals( s )) {
-            batch.add( quad );
-        }
-        else {
+
+        checkBatchBoundary( quad.getSubject() );
+        queue.add( quad );
+        checkSingletonBatch();
+    }
+
+    protected void checkBatchBoundary( Node subject ) {
+        if (!currentSubject.equals( subject )) {
             addBatch();
             startNewBatch();
-            subject = s;
-            batch.add( quad );
+            currentSubject = subject;
         }
+    }
 
-        // this is a single
+    protected void startNewBatch() {
+        queue.clear();
+        currentSubject = null;
+    }
+
+    /**
+     * I'm actually not quite sure under what circumstances this arises, but it's part
+     * of the original code so I'm keeping it!
+     */
+    protected void checkSingletonBatch() {
         if (!started) {
             addBatch();
             startNewBatch();
         }
-
-        // Entity entity = TextQueryFuncs.entityFromQuad(defn, g, s, p, o) ;
-        // if ( entity != null )
-        // // Null means does not match defn
-        // indexer.addEntity(entity) ;
     }
 
-    private void startNewBatch() {
-        batch = new ArrayList<Quad>();
-        subject = null;
-    }
-
-    private void addBatch() {
-        if (subject == null) {
-            // nothing to index
-            return;
-        }
-        ExtendedEntity entity = new ExtendedEntity( defn, null, subject );
-        int count = addQuads( batch.iterator(), entity );
-        if (count == 0) {
-            return;
-        }
-
-        // add pre-existing fields to the entity
-        count += addQuads( dsg.find( null, subject, null, null ), entity );
-
-        if (count > 0) {
-            indexer.updateEntity( entity );
+    protected void addBatch() {
+        if (currentSubject != null) {
+            ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
+            int count = addQuads( queue.iterator(), entity );
+            if (count > 0) {
+                // add pre-existing fields to the entity
+                // TODO check: should include graph ID in the find() here??
+                count += addQuads( dsg.find( null, currentSubject, null, null ), entity );
+                indexer.updateEntity( entity );
+            }
         }
     }
 
-    private int addQuads( Iterator<Quad> iter, ExtendedEntity entity ) {
+    protected int addQuads( Iterator<Quad> iter, ExtendedEntity entity ) {
         int count = 0;
-        for (; iter.hasNext();) {
+
+        while (iter.hasNext()) {
             Quad quad = iter.next();
-            boolean added = entity.addProperty( defn, quad.getPredicate(), quad.getObject() );
+            boolean added = entity.addProperty( entityDefinition(), quad.getPredicate(), quad.getObject() );
             if (added) {
                 count++;
             }
         }
+
         return count;
     }
+
+    /***********************************/
+    /* Inner class definitions         */
+    /***********************************/
+
+
+
 }
