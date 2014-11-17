@@ -91,13 +91,13 @@ public class ExtendedEntityTest
         assertEquals( "http://test.com/g", xe.getGraph() );
     }
 
-    @Test (expected=NotSuitableForIndexing.class)
+    @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_1() {
         // resource o is not suitable for indexing
         new ExtendedEntity( ed_withG, g, s, p, o );
     }
 
-    @Test (expected=NotSuitableForIndexing.class)
+    @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_2() {
         // no field for l
         new ExtendedEntity( ed_withG, g, s, p, l );
@@ -110,13 +110,13 @@ public class ExtendedEntityTest
         assertEquals( "foo", xe.get( "foo_field" ));
     }
 
-    @Test (expected=NotSuitableForIndexing.class)
+    @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionQuad_1() {
         Quad q = new Quad( g, s, p, o );
         new ExtendedEntity( ed_withG, q );
     }
 
-    @Test (expected=NotSuitableForIndexing.class)
+    @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionQuad_2() {
         Quad q = new Quad( g, s, p, l );
         new ExtendedEntity( ed_withG, q );

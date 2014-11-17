@@ -23,7 +23,7 @@ package com.epimorphics.lr.jena.query.text;
  * is defined for the predicate).
  */
 @SuppressWarnings( "serial" )
-public class NotSuitableForIndexing
+public class NotSuitableForIndexingException
 extends RuntimeException
 {
     // no constructor, this is just a marker exception

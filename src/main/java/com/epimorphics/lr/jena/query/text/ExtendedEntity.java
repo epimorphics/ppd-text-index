@@ -68,13 +68,13 @@ extends Entity
      * @param s Node denoting the subject
      * @param p Node denoting the predicate
      * @param o Node denoting the object
-     * @exception NotSuitableForIndexing if the node cannot be indexed
+     * @exception NotSuitableForIndexingException if the node cannot be indexed
      */
     public ExtendedEntity( EntityDefinition defn, Node g, Node s, Node p, Node o ) {
         this( defn, g, s );
 
         if (!addProperty( defn, p, o )) {
-            throw new NotSuitableForIndexing();
+            throw new NotSuitableForIndexingException();
         }
     }
 
@@ -84,7 +84,7 @@ extends Entity
      *
      * @param defn Entity definition
      * @param quad Quad to be indexed
-     * @exception NotSuitableForIndexing if the quad cannot be indexed
+     * @exception NotSuitableForIndexingException if the quad cannot be indexed
      */
     public ExtendedEntity( EntityDefinition defn, Quad quad ) {
         this( defn, quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() );
