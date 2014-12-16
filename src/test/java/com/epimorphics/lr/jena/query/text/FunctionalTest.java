@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.tdb.TDB;
 
 /**
  * Functional test for test indexing, covering building an index from scratch
@@ -199,8 +200,10 @@ public class FunctionalTest
             }
 
             ds.begin( ReadWrite.READ );
-            log.debug( "Load completed, dataset size is: " + ds.getDefaultModel().size() );
+            log.debug( "Load completed, dataset size is: " + ds.getNamedModel( "urn:x-arq:UnionGraph" ).size() );
             ds.end();
+
+            TDB.sync( ds );
         }
         catch (Exception e) {
             log.error( e.getMessage() );
