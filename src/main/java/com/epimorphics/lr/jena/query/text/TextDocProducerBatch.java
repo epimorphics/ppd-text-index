@@ -65,6 +65,7 @@ public class TextDocProducerBatch
     public TextDocProducerBatch( DatasetGraph dsg, TextIndex textIndex ) {
         this.dsg = dsg;
         this.indexer = textIndex;
+        log.debug( "Initialising TextDocProducerBatch" );
     }
 
     /***********************************/
@@ -88,6 +89,7 @@ public class TextDocProducerBatch
 
     @Override
     public void start() {
+        log.debug( "TextDocProducerBatch.start()" );
         indexer.startIndexing();
         started = true;
         startNewBatch();
@@ -95,6 +97,7 @@ public class TextDocProducerBatch
 
     @Override
     public void finish() {
+        log.debug( "TextDocProducerBatch.finish()" );
         addBatch();
         startNewBatch();
         indexer.finishIndexing();
@@ -160,6 +163,7 @@ public class TextDocProducerBatch
 
     protected void addBatch() {
         if (currentSubject != null) {
+            log.debug( "TextDocProducerBatch adding new batch for " + currentSubject );
             ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
             int count = addQuads( queue.iterator(), entity );
             if (count > 0) {
