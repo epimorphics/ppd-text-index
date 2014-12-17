@@ -68,7 +68,7 @@ text:TextIndexSolr    rdfs:subClassOf   text:TextIndex .
     text:docProducer "com.epimorphics.lr.jena.query.text.TextDocProducerBatch" ;
     .
 <#indexLucene> a text:TextIndexLucene ;
-    text:directory <file:target/tdb-testing-lucene>;
+    text:directory <file:target/tdb-testing-index>;
     text:entityMap <#entMap> ;
     .
 
