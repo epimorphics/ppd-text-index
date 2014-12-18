@@ -14,6 +14,6 @@ PREFIX  lrcommon: <http://landregistry.data.gov.uk/def/common/>
 
 SELECT *
 WHERE
-  { ?ppd_propertyAddress lrcommon:town "DOVER"^^xsd:string .
+  { ?ppd_propertyAddress lrcommon:street "THE ALDERS"^^xsd:string .
     ?item ppd:propertyAddress ?ppd_propertyAddress.
   }
