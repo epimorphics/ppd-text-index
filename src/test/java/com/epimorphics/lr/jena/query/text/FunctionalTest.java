@@ -116,6 +116,15 @@ public class FunctionalTest
     }
 
     /**
+     * Test that we are indexing addresses as single documents - match two
+     * fields on one address
+     */
+    @Test
+    public void testMultipleFieldsSingleDocument() {
+        testQueryPostcodeCount( "query-town-and-paon.sparql", "NG19 6NA", 1);
+    }
+
+    /**
      * Test that the base dataset is indexed as it is loaded.
      */
     @Test
