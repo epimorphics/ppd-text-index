@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.tdb.StoreConnection;
+import com.hp.hpl.jena.tdb.base.file.Location;
 
 /**
  * Functional test for test indexing, covering building an index from scratch
@@ -81,6 +83,8 @@ public class FunctionalTest
     @Before
     public void resetTDB() {
         log.debug( "Reset TDB" );
+        StoreConnection.expel( Location.create(TDB_TEST_ROOT), true );
+
         File tdbDir = new File( TDB_TEST_ROOT );
         File indexDir = new File( TDB_INDEX_ROOT );
 
@@ -108,7 +112,31 @@ public class FunctionalTest
      */
     @Test
     public void testCreateIndexForBaseDataset() {
-        ResultSet results = queryData( ds, loadQuery( TEST_RESOURCES + "query-town-dover.sparql" ) );
+        testQueryPostcodeCount( "query-town-dover.sparql", "CT17 9LD", 1 );
+    }
+
+    /**
+     * Test that the base dataset is indexed as it is loaded.
+     */
+    @Test
+    public void testIndexAllowsStopWords() {
+        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
+    }
+
+    /***********************************/
+    /* Internal implementation methods */
+    /***********************************/
+
+    /**
+     * Perform a test query as a select, and check that the results include a certain address
+     * (identified by postcode) and matches a certain number of results
+     *
+     * @param sparql
+     * @param expectedPostcode
+     * @param expectedHits
+     */
+    public void testQueryPostcodeCount( String sparql, String expectedPostcode, int expectedHits ) {
+        ResultSet results = queryData( ds, loadQuery( TEST_RESOURCES + sparql ) );
         assertTrue( "Query failed to return any results", results.hasNext() );
 
         int n = 0;
@@ -119,16 +147,12 @@ public class FunctionalTest
             n++;
 
             String postcode = soln.getLiteral( "ppd_propertyAddressPostcode" ).getLexicalForm();
-            seenPostcode = seenPostcode || postcode.equals( "CT17 9LD" );
+            seenPostcode = seenPostcode || postcode.equals( expectedPostcode );
         }
 
-        assertTrue( "Expected to see postcode", seenPostcode );
-        assertEquals( 1, n );
+        assertTrue( "Expected to see postcode " + expectedPostcode, seenPostcode );
+        assertEquals( "Expected " + expectedHits + " results", expectedHits, n );
     }
-
-    /***********************************/
-    /* Internal implementation methods */
-    /***********************************/
 
     /**
      * @return A dataset given an assembler description
