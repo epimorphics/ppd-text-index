@@ -19,8 +19,7 @@ SELECT
   ?ppd_propertyAddressPostcode ?ppd_propertyAddressSaon ?ppd_propertyAddressStreet
   ?ppd_propertyAddressTown ?ppd_propertyType ?ppd_recordStatus
 WHERE
-  { ?ppd_propertyAddress text:query ( lrcommon:town "mansfield"  3000000 ),
-                         text:query ( lrcommon:paon "14" 3000000 ).
+  { ?ppd_propertyAddress text:query ( "paon: ( 14 )  AND town: ( mansfield )"  3000000 ).
     ?item ppd:propertyAddress ?ppd_propertyAddress .
     ?item ppd:hasTransaction ?ppd_hasTransaction .
     ?item ppd:pricePaid ?ppd_pricePaid .

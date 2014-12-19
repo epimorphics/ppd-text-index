@@ -125,7 +125,7 @@ public class FunctionalTest
     }
 
     /**
-     * Test that the base dataset is indexed as it is loaded.
+     * Test that index allows stop-words like 'the' to be indexed as parts of addresses
      */
     @Test
     public void testIndexAllowsStopWords() {
