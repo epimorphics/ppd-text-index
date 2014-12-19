@@ -167,8 +167,7 @@ public class FunctionalTest
      * @return A dataset given an assembler description
      */
     public Dataset createDsFromAssembler( String assemblerFile ) {
-        Dataset ds = DatasetFactory.assemble( TEST_RESOURCES + assemblerFile, TEXT_CONFIG_ROOT );
-        return ds ;
+        return DatasetFactory.assemble( TEST_RESOURCES + assemblerFile, TEXT_CONFIG_ROOT );
     }
 
     /**
@@ -177,6 +176,7 @@ public class FunctionalTest
      * @param dataFile
      * @return
      */
+    @SuppressWarnings( "hiding" )
     public Dataset loadDataset( String assemblerFile, String dataFile ) {
         Dataset ds = null;
         try {
@@ -206,6 +206,7 @@ public class FunctionalTest
     /**
      * @return The resultset from running the given sparql query against the given dataset
      */
+    @SuppressWarnings( "hiding" )
     public ResultSet queryData( Dataset ds, String sparql ) {
         ds.begin(ReadWrite.READ) ;
         ResultSet rs = null;

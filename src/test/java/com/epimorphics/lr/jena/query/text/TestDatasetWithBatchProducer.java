@@ -237,6 +237,7 @@ public class TestDatasetWithBatchProducer {
         dir.delete() ;
     }
 
+    @SuppressWarnings( "hiding" )
     private static void doTestQuery(Dataset dataset, String label, String queryString, Set<String> expectedEntityURIs, int expectedNumResults) {
         Query query = QueryFactory.create(queryString) ;
         QueryExecution qexec = QueryExecutionFactory.create(query, dataset) ;
