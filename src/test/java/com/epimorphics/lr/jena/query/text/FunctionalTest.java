@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.file.Location;
+import com.hp.hpl.jena.update.*;
 
 /**
  * Functional test for test indexing, covering building an index from scratch
@@ -130,6 +131,26 @@ public class FunctionalTest
     @Test
     public void testIndexAllowsStopWords() {
         testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
+    }
+
+    /**
+     * Test that incremental deletes remove documents from the index
+     */
+//    @Test
+//    public void testIndexIncrementalDelete() {
+//        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
+//        updateData( ds, loadQuery( "update-delete.sparql" ) );
+//        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 6 );
+//    }
+
+    /**
+     * Test that incremental adds are indexed
+     */
+    @Test
+    public void testIndexIncrementalAdd() {
+        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
+        updateData( ds, loadQuery( TEST_RESOURCES + "update-add.sparql" ) );
+        testQueryPostcodeCount( "query-with-stop-word.sparql", "PAT JESS", 8 );
     }
 
     /***********************************/
@@ -237,6 +258,23 @@ public class FunctionalTest
         catch (IOException e) {
             log.error( e.getMessage(), e );
             throw new RuntimeException( e );
+        }
+    }
+
+    /**
+     * Perform a sparql update
+     */
+    @SuppressWarnings( "hiding" )
+    public void updateData( Dataset ds, String sparql ) {
+        ds.begin(ReadWrite.WRITE) ;
+
+        try {
+            GraphStore graphStore = GraphStoreFactory.create(ds) ;
+            UpdateAction.parseExecute( sparql, graphStore ) ;
+            ds.commit() ;
+        }
+        finally {
+            ds.end() ;
         }
     }
 

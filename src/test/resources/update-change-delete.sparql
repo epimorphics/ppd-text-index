@@ -1,0 +1,13 @@
+PREFIX ppi: <http://landregistry.data.gov.uk/def/ppi/>
+WITH <http://landregistry.data.gov.uk/PPD>
+DELETE {?transr ?p ?v}
+WHERE
+{
+  VALUES ?transactionId {
+    "792FC34A-30D9-4812-959E-002DC8938400"^^ppi:TransactionIdDatatype
+  }
+  ?transr ppi:transactionId ?transactionId .
+  BIND("dummy" AS ?dummy)
+  ?transr a ppi:Transaction .
+  ?transr ?p ?v .
+}

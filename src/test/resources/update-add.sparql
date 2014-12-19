@@ -1,0 +1,37 @@
+PREFIX ppi:   <http://landregistry.data.gov.uk/def/ppi/>
+PREFIX common: <http://landregistry.data.gov.uk/def/common/>
+PREFIX xs:    <http://www.w3.org/2001/XMLSchema#>
+
+INSERT DATA {
+  GRAPH <http://landregistry.data.gov.uk/PPD> {
+    <http://landregistry.data.gov.uk/data/ppi/address/d50c873b6c9573474644ad037bbc5fd738d50ab8-TEST>
+        a       <http://landregistry.data.gov.uk/def/common/BS7666Address> ;
+        <http://landregistry.data.gov.uk/def/common/county>
+                "LANCASHIRE"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/district>
+                "BURNLEY"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/locality>
+                "PADIHAM"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/paon>
+                "14"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/postcode>
+                "PAT JESS"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/street>
+                "THE SHORTLANDS"^^<http://www.w3.org/2001/XMLSchema#string> ;
+        <http://landregistry.data.gov.uk/def/common/town>
+                "BURNLEY"^^<http://www.w3.org/2001/XMLSchema#string> .
+
+    <http://landregistry.data.gov.uk/data/ppi/transaction/2BD3029D-450D-41A3-AFAD-D8D799F19BFD/2014-10-78996-TEST>
+        a                    ppi:TransactionRecord ;
+        ppi:estateType       common:leasehold ;
+        ppi:hasTransaction   <http://landregistry.data.gov.uk/data/ppi/transaction/2BD3029D-450D-41A3-AFAD-D8D799F19BFD> ;
+        ppi:newBuild         true ;
+        ppi:pricePaid        279995 ;
+        ppi:propertyAddress  <http://landregistry.data.gov.uk/data/ppi/address/d50c873b6c9573474644ad037bbc5fd738d50ab8-TEST> ;
+        ppi:propertyType     common:terraced ;
+        ppi:publishDate      "2014-10-22"^^xs:date ;
+        ppi:recordStatus     ppi:add ;
+        ppi:transactionDate  "2014-08-04"^^xs:date ;
+        ppi:transactionId    "2BD3029D-450D-41A3-AFAD-D8D799F19BFD"^^ppi:TransactionIdDatatype .
+  }
+}

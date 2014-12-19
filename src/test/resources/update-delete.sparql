@@ -1,0 +1,10 @@
+PREFIX ppi: <http://landregistry.data.gov.uk/def/ppi/>
+WITH <http://landregistry.data.gov.uk/PPD>
+DELETE {?address ?p ?v}
+WHERE
+{
+  VALUES ?address {
+    <http://landregistry.data.gov.uk/data/ppi/address/d50c873b6c9573474644ad037bbc5fd738d50ab8>
+  }
+  ?address ?p ?v .
+};
