@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.*;
@@ -134,16 +135,6 @@ public class FunctionalTest
     }
 
     /**
-     * Test that incremental deletes remove documents from the index
-     */
-//    @Test
-//    public void testIndexIncrementalDelete() {
-//        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
-//        updateData( ds, loadQuery( "update-delete.sparql" ) );
-//        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 6 );
-//    }
-
-    /**
      * Test that incremental adds are indexed
      */
     @Test
@@ -151,6 +142,16 @@ public class FunctionalTest
         testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
         updateData( ds, loadQuery( TEST_RESOURCES + "update-add.sparql" ) );
         testQueryPostcodeCount( "query-with-stop-word.sparql", "PAT JESS", 8 );
+    }
+
+    /**
+     * Test that incremental deletes remove documents from the index
+     */
+    @Test
+    public void testIndexIncrementalDelete() {
+        testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
+        updateData( ds, loadQuery( TEST_RESOURCES + "update-delete.sparql" ) );
+        testQueryPostcodeCount( "query-with-stop-word.sparql", "AL9 5DQ", 6 );
     }
 
     /***********************************/
@@ -176,8 +177,9 @@ public class FunctionalTest
             QuerySolution soln = results.next();
             n++;
 
-            String postcode = soln.getLiteral( "ppd_propertyAddressPostcode" ).getLexicalForm();
-            seenPostcode = seenPostcode || postcode.equals( expectedPostcode );
+            Literal l = soln.getLiteral( "ppd_propertyAddressPostcode" );
+            String postcode = (l == null) ? null : l.getLexicalForm();
+            seenPostcode = seenPostcode || (postcode != null && postcode.equals( expectedPostcode ));
         }
 
         assertTrue( "Expected to see postcode " + expectedPostcode, seenPostcode );

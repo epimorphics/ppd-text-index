@@ -21,6 +21,7 @@ package com.epimorphics.lr.jena.query.text;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
+import org.apache.lucene.index.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +54,13 @@ public class TextDocProducerBatch
 
     private TextIndex indexer;
     private DatasetGraph dsg;
-    private boolean started;
 
     List<Quad> queue = new ArrayList<Quad>();
+
+    /* If true, the queue contains quads to add, otherwise quads to remove */
+    boolean queueAdd = true;
+
+    /* The subject currently being processed, to detect subject change boundaries */
     Node currentSubject;
 
     /***********************************/
@@ -91,17 +96,21 @@ public class TextDocProducerBatch
     public void start() {
         log.debug( "TextDocProducerBatch.start()" );
         indexer.startIndexing();
-        started = true;
-        startNewBatch();
+        startNewBatch( true );
     }
 
     @Override
     public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
-        addBatch();
-        startNewBatch();
+        if (queueAdd) {
+            addBatch();
+        }
+        else {
+            removeBatch();
+        }
+
+        startNewBatch( true );
         indexer.finishIndexing();
-        started = false;
     }
 
     @Override
@@ -112,7 +121,7 @@ public class TextDocProducerBatch
                 indexNewQuad( quad );
                 break;
             case DELETE:
-                log.warn( "Saw change action DELETE, but ignoring it!" );
+                unIndex( quad );
                 break;
             case NO_ADD:
                 log.warn( "Saw change action NO_ADD, but ignoring it!" );
@@ -132,37 +141,31 @@ public class TextDocProducerBatch
             currentSubject = quad.getSubject();
         }
 
-        checkBatchBoundary( quad.getSubject() );
+        checkBatchBoundary( quad.getSubject(), true );
         queue.add( quad );
-        checkSingletonBatch();
     }
 
-    protected void checkBatchBoundary( Node subject ) {
-        if (!currentSubject.equals( subject )) {
-            addBatch();
-            startNewBatch();
+    protected void checkBatchBoundary( Node subject, boolean add ) {
+        if (!(currentSubject.equals( subject ) && queueAdd == add)) {
+            if (add) {
+                addBatch();
+            }
+            else {
+                removeBatch();
+            }
+            startNewBatch( add );
             currentSubject = subject;
         }
     }
 
-    protected void startNewBatch() {
+    protected void startNewBatch( boolean add ) {
         queue.clear();
         currentSubject = null;
-    }
-
-    /**
-     * I'm actually not quite sure under what circumstances this arises, but it's part
-     * of the original code so I'm keeping it!
-     */
-    protected void checkSingletonBatch() {
-        if (!started) {
-            addBatch();
-            startNewBatch();
-        }
+        queueAdd = add;
     }
 
     protected void addBatch() {
-        if (currentSubject != null) {
+        if (currentSubject != null && !queue.isEmpty()) {
             log.debug( "TextDocProducerBatch adding new batch for " + currentSubject );
             ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
             int count = addQuads( queue.iterator(), entity );
@@ -187,6 +190,61 @@ public class TextDocProducerBatch
         }
 
         return count;
+    }
+
+    /**
+     * Remove a batch of quads that we have queued up. All of the quads will have the same
+     * subject. Currently only works for Lucene indexes.
+     */
+    protected void removeBatch() {
+        if (currentSubject != null && !queue.isEmpty()) {
+            log.debug( "TextDocProducerBatch unindexing document for " + currentSubject );
+
+            // TODO needs some work to make this a general capability
+            if (indexer instanceof TextIndexLucene) {
+                removeLuceneDocument( (TextIndexLucene) indexer );
+            }
+            else {
+                log.warn( "Sorry, deleting is not yet supported on " + indexer.getClass().getName() );
+            }
+        }
+    }
+
+    /**
+     * Remove a batch of same-subject quads from a Lucene index. Basic strategy is to
+     * remove the document for the common subject, then re-index any properties that remain
+     * in the quad store for that subject.
+     *
+     * @param indexerLucene
+     */
+    protected void removeLuceneDocument( TextIndexLucene indexerLucene ) {
+        String key = currentSubject.isBlank() ? currentSubject.getBlankNodeLabel() : currentSubject.getURI();
+        indexerLucene.deleteDocuments( new Term( "uri", key ) );
+
+        // there may be triples left that have current subject as subject
+        // we need to put those back
+        ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
+
+        // TODO check: should include graph ID in the find() here??
+        int count = addQuads( dsg.find( null, currentSubject, null, null ), entity );
+        if (count > 0) {
+            indexer.updateEntity( entity );
+        }
+    }
+
+    /**
+     * In the case that a quad is being removed, we batch up the properties change
+     * events until a boundary occurs, then delete that quad subject's document,
+     * and re-add a document if any properties remain for the subject.
+     * @param quad The quad being removed by this change event
+     */
+    protected void unIndex( Quad quad ) {
+        if (currentSubject == null) {
+            currentSubject = quad.getSubject();
+        }
+
+        checkBatchBoundary( quad.getSubject(), false );
+        queue.add( quad );
     }
 
     /***********************************/
