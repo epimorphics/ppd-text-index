@@ -92,9 +92,9 @@ public class ProgressMonitor
      */
     public void close() {
         long now = System.currentTimeMillis();
-        String message = String.format( "%d (%.2f per second)",
+        String message = String.format( "%d (%.2f per second)", // does two decimal places make sense here?
                                         progressCount,
-                                        progressCount / overallDurationRounded( now ));
+                                        (float) progressCount / (float) overallDurationRounded( now ));
         log.info( message );
     }
 
@@ -114,11 +114,11 @@ public class ProgressMonitor
     protected void report( long now ) {
         long progressThisInterval = progressCount - progressAtStartOfInterval;
 
-        String message = String.format( "%d (%.2f per second) %s (%.2f per second overall)",
+        String message = String.format( "%d (%.2f per second) %s (%.2f per second overall)", // does two decimal places make sense?
                                         progressCount,
-                                        progressThisInterval / intervalSecondsRounded( now ),
+                                        (float) progressThisInterval / (float) intervalSecondsRounded( now ),
                                         progressMessage,
-                                        progressCount / overallDurationRounded( now )
+                                        (float) progressCount / (float) overallDurationRounded( now )
                                         );
         log.info( message );
     }
