@@ -128,7 +128,7 @@ public class TextIndexer
     protected void indexSubject( EntityDefinition def, Node g, Node s, TextIndex index, ProgressMonitor pm ) {
         ExtendedEntity entity = new ExtendedEntity( def, g, s );
         int count = 0;
-
+        see(g,s);
         for (Iterator<Quad> i = datasetGraph.find( g, s, null, null ); i.hasNext();) {
             Quad quad = i.next();
             if (entity.addProperty( def, quad.getPredicate(), quad.getObject() )) {
