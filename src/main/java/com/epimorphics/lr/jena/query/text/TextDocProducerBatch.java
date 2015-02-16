@@ -95,7 +95,7 @@ public class TextDocProducerBatch
     @Override
     public void start() {
         log.debug( "TextDocProducerBatch.start()" );
-        indexer.startIndexing();
+        // indexer.startIndexing();
         startNewBatch( true );
     }
 
@@ -110,7 +110,7 @@ public class TextDocProducerBatch
         }
 
         startNewBatch( true );
-        indexer.finishIndexing();
+        // indexer.finishIndexing();
     }
 
     @Override

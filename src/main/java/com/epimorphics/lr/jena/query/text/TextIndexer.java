@@ -59,7 +59,7 @@ public class TextIndexer
         TextIndex textIndex = currentTextIndex( datasetGraph );
         EntityDefinition entityDefinition = textIndex.getDocDef();
 
-        textIndex.startIndexing();
+        // textIndex.startIndexing();
 
         Iterator<Quad> quadIter = datasetGraph.find( Node.ANY, Node.ANY, Node.ANY, Node.ANY );
         while (quadIter.hasNext()) {
@@ -72,7 +72,7 @@ public class TextIndexer
             }
         }
 
-        textIndex.finishIndexing();
+        // textIndex.finishIndexing();
     }
 
     /**

@@ -108,6 +108,11 @@ public class FunctionalTest
 
         ds = loadDataset( ASSEMBLER_CONFIG, PPD_BASE_TEST_DATA );
     }
+    
+    @After 
+    public void closeDataset() {
+    	ds.close();
+    }
 
     /**
      * Test that the base dataset is indexed as it is loaded.
@@ -229,7 +234,6 @@ public class FunctionalTest
     /**
      * @return The resultset from running the given sparql query against the given dataset
      */
-    @SuppressWarnings( "hiding" )
     public ResultSet queryData( Dataset ds, String sparql ) {
         ds.begin(ReadWrite.READ) ;
         ResultSet rs = null;
@@ -266,7 +270,6 @@ public class FunctionalTest
     /**
      * Perform a sparql update
      */
-    @SuppressWarnings( "hiding" )
     public void updateData( Dataset ds, String sparql ) {
         ds.begin(ReadWrite.WRITE) ;
 
