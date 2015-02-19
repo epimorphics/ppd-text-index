@@ -102,16 +102,19 @@ public class TextDocProducerBatch
     @Override
     public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
-        if (queueAdd) {
+        flush();
+    }
+
+	public void flush() {
+        log.debug( "TextDocProducerBatch.flush()" );
+		if (queueAdd) {
             addBatch();
         }
         else {
             removeBatch();
         }
-
-        startNewBatch( true );
-        // indexer.finishIndexing();
-    }
+		startNewBatch( true );
+	}
 
     @Override
     public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {

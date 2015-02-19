@@ -51,7 +51,7 @@ public class textindexer
     protected EntityDefinition entityDefinition ;
 
     static public void main(String... argv) {
-        System.out.println("********** this is a new indexer ***********");
+        System.out.println(";;; -- this is a newer indexer -----------------------------");
         TextQuery.init() ;
         new textindexer(argv).mainRun() ;
     }
