@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class TestTextIndexingCommand {
 
-	@Ignore @Test public void testTextIndexer() {
+	@Test public void testTextIndexer() {
 		textindexer.main("--desc", "src/test/resources/config-ppd-text.ttl");
 	}
 }
