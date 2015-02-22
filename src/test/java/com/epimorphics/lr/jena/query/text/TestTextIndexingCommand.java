@@ -9,5 +9,7 @@ public class TestTextIndexingCommand {
 
 	@Test public void testTextIndexer() {
 		textindexer.main("--desc", "src/test/resources/config-ppd-text.ttl");
+		
+		
 	}
 }
