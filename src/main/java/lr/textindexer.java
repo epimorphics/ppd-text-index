@@ -51,7 +51,7 @@ public class textindexer
     protected EntityDefinition entityDefinition ;
 
     static public void main(String... argv) {
-        System.out.println(";;; -- this is a newer indexer -----------------------------");
+        System.out.println(";;; -- this is a newer indexer [A] -------------------");
         TextQuery.init() ;
         new textindexer(argv).mainRun() ;
     }
@@ -111,6 +111,7 @@ public class textindexer
         TextIndexer indexer = new TextIndexer(dataset);
         ProgressMonitor pm = new ProgressMonitor("properties indexed", log );
         indexer.index(pm);
+        dataset.close();
         pm.close();
     }
 }

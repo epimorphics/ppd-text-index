@@ -61,12 +61,12 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
 # Solr index
 text:TextIndexSolr    rdfs:subClassOf   text:TextIndex .
 
-
 <#ds-with-lucene> rdf:type     text:TextDataset;
     text:dataset   <#ds> ;
     text:index     <#indexLucene> ;
     text:docProducer "com.epimorphics.lr.jena.query.text.TextDocProducerBatch" ;
     .
+    
 <#indexLucene> a text:TextIndexLucene ;
     text:directory <file:target/tdb-testing-index>;
     text:entityMap <#entMap> ;
@@ -77,8 +77,10 @@ text:TextIndexSolr    rdfs:subClassOf   text:TextIndex .
 # rdfs:label is mapped to field "text"
 
 #include prefixes used in the entity map
-  @prefix def-hpi: <http://landregistry.data.gov.uk/def/hpi/> .
-  @prefix def-common: <http://landregistry.data.gov.uk/def/common/> .
+  
+@prefix def-hpi: <http://landregistry.data.gov.uk/def/hpi/> .
+@prefix def-common: <http://landregistry.data.gov.uk/def/common/> .
+  
 <#entMap> a text:EntityMap ;
     text:entityField      "uri" ;
     text:defaultField     "text" ;
