@@ -66,9 +66,18 @@ text:TextIndexSolr    rdfs:subClassOf   text:TextIndex .
     text:index     <#indexLucene> ;
     text:docProducer "com.epimorphics.lr.jena.query.text.TextDocProducerBatch" ;
     .
-    
+
+#
+# The lucene index. NOTE that the directory here is expressed as
+# a relative pathname in a string literal, NOT a file: URI. Making
+# it a file: URI (a) results in diagnostic warnings from the Jena
+# IRI handler, or (b) forces it to contain an absolute path, but
+# we don't know what the absolute path /is/ because it depends on
+# where the developer has installed their code. This code rather assumes
+# that the current directory is sensibly set.
+#
 <#indexLucene> a text:TextIndexLucene ;
-    text:directory <file:target/tdb-testing-index>;
+    text:directory "target/tdb-testing-index";
     text:entityMap <#entMap> ;
     .
 
