@@ -108,10 +108,13 @@ public class textindexer
 
     @Override
     protected void exec() {
-        TextIndexer indexer = new TextIndexer(dataset);
-        ProgressMonitor pm = new ProgressMonitor("properties indexed", log );
-        indexer.index(pm);
-        dataset.close();
-        pm.close();
+        try { 
+        	TextIndexer indexer = new TextIndexer(dataset);
+        	ProgressMonitor pm = new ProgressMonitor("properties indexed", log );
+        	indexer.index(pm);
+        	pm.close(); 
+        } finally {
+        	dataset.close();
+        }
     }
 }
