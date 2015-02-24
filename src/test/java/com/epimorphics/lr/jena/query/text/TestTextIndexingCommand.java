@@ -37,29 +37,26 @@ public class TestTextIndexingCommand {
 
     Dataset ds = null;
     
-	@BeforeClass public static void runTextIndexer() throws IOException {
-				
-		loadTestData();        
-		
+	@BeforeClass public static void runTextIndexer() throws IOException {	
+		clearIndex();
+		clearTDB();
+		loadData();        
+		clearIndex();
 		StoreConnection.expel( Location.create(FunctionalTest.TDB_TEST_ROOT), true );
-
 		textindexer.main("--desc", "src/test/resources/config-ppd-text.ttl");
-				
-		StoreConnection.expel( Location.create(FunctionalTest.TDB_TEST_ROOT), true );
 	}
 	
-	static void loadTestData() throws IOException {
-		establishFiles();
-		loadData();
-	}
-	
-	static void establishFiles() throws IOException {
-		File tdbDir = new File( FunctionalTest.TDB_TEST_ROOT );
+	static void clearIndex() throws IOException {
         File indexDir = new File( FunctionalTest.TDB_INDEX_ROOT );
-        FileUtils.deleteDirectory( tdbDir );
         FileUtils.deleteDirectory( indexDir );
-        tdbDir.mkdir();
         indexDir.mkdir();
+	}
+
+	private static void clearTDB() throws IOException {
+		clearIndex();
+		File tdbDir = new File( FunctionalTest.TDB_TEST_ROOT );
+        FileUtils.deleteDirectory( tdbDir );
+        tdbDir.mkdir();
 	}
 	
 	@Before public void openDataset() {
