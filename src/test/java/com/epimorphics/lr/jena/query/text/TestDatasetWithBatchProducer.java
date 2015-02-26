@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.jena.atlas.lib.StrUtils;
+import org.apache.jena.query.text.DatasetGraphText;
 import org.apache.jena.query.text.TextQuery;
 import org.apache.jena.query.text.assembler.TextAssembler;
 import org.junit.After;
@@ -19,6 +20,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.assembler.Assembler;
 import com.hp.hpl.jena.query.Dataset;
@@ -45,7 +48,8 @@ public class TestDatasetWithBatchProducer {
     private static final String SPEC_ROOT_LOCAL = "lucene_text_dataset";
     private static final String SPEC_ROOT_URI = SPEC_BASE + SPEC_ROOT_LOCAL;
     private static final String SPEC;
-    
+
+    private static Logger log = LoggerFactory.getLogger( TestDatasetWithBatchProducer.class );
     private Dataset dataset;
     
     static {
@@ -64,7 +68,7 @@ public class TestDatasetWithBatchProducer {
                     "    a              text:TextDataset ;",
                     "    text:dataset   :dataset ;",
                     "    text:index     :indexLucene ;",
-                    "    text:docProducer '" + TextDocProducerBatch.class.getCanonicalName() + "'",
+                    "    text:textDocProducer <java:" + TextDocProducerBatch.class.getCanonicalName() + ">",
                     "    .",
                     "",
                     ":dataset",
@@ -108,7 +112,11 @@ public class TestDatasetWithBatchProducer {
     
     @After 
     public void closeDataset() {
-    	dataset.close();
+    	if (dataset == null) {
+    		log.warn("dataset was not set up");
+    	} else {
+    		dataset.close();
+    	}
     }
 
     @AfterClass
@@ -120,7 +128,8 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testConfiguresBatchProducer() {
-        assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
+        DatasetGraphText dsgText = (DatasetGraphText)dataset.asDatasetGraph() ;
+        assertTrue(dsgText.getMonitor() instanceof TextDocProducerBatch) ;
     }
 
     @Test

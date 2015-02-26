@@ -64,7 +64,7 @@ text:TextIndexSolr    rdfs:subClassOf   text:TextIndex .
 <#ds-with-lucene> rdf:type     text:TextDataset;
     text:dataset   <#ds> ;
     text:index     <#indexLucene> ;
-    text:docProducer "com.epimorphics.lr.jena.query.text.TextDocProducerBatch" ;
+    text:textDocProducer <java:com.epimorphics.lr.jena.query.text.TextDocProducerBatch> ;
     .
 
 #

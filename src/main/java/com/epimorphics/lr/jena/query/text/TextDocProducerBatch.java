@@ -72,6 +72,10 @@ public class TextDocProducerBatch
         this.indexer = textIndex;
         log.debug( "Initialising TextDocProducerBatch" );
     }
+    
+    public TextDocProducerBatch( TextIndex textIndex ) {
+    	this(null, textIndex);
+    }
 
     /***********************************/
     /* External signature methods      */
