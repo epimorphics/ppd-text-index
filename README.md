@@ -1,3 +1,9 @@
+# PPD text index README
+
+See [the revised-A branch documentation](revised-README.md) for the
+latest changes to this project, compatible with Pull Request 42
+for apache-jena.
+
 # PPD text index
 
 A text indexer for Jena Text to work the the price paid data. This
