@@ -192,4 +192,9 @@ same subject together, the bulk indexer records all
 the subjects seen so far, so additional Java heap 
 space may be needed.
 
+`TextDocProducerBatch` does not keep track of whether or
+not it's in a transaction (*ie* between a `start()` and
+its corresponding `finish()`; it assumes it's inside
+an externally-constructed transaction.
+
 The code only applies in the default graph.
