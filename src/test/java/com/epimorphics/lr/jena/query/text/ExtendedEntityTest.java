@@ -18,9 +18,12 @@ package com.epimorphics.lr.jena.query.text;
 
 import static org.junit.Assert.*;
 
+import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.text.EntityDefinition;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
@@ -30,46 +33,25 @@ import com.hp.hpl.jena.sparql.core.Quad;
  * Unit tests for {@link ExtendedEntity}
  */
 public class ExtendedEntityTest
-{
-    /***********************************/
-    /* Constants                       */
-    /***********************************/
+{    
+	private static final Logger log = LoggerFactory.getLogger( FunctionalTest.class );
 
-    /***********************************/
-    /* Static variables                */
-    /***********************************/
+	private final Node s = node("http://test.com/s");
+    private final Node p = node("http://test.com/p");
+    private final Node o = node("http://test.com/o");
+    private final Node l = literal("foo");
 
-    /***********************************/
-    /* Instance variables              */
-    /***********************************/
+    private final Node g = node( "http://test.com/g" );
 
-    private Node s;
-    private Node g;
-    private Node p;
-    private Node o;
-    private Node l;
+    private final EntityDefinition ed_withG = new EntityDefinition( "entity", "primary" ) ;
+    private final EntityDefinition ed_noG = new EntityDefinition( "entity", "primary", "graph" );
 
-    private EntityDefinition ed_withG;
-    private EntityDefinition ed_noG;
-
-    /***********************************/
-    /* Constructors                    */
-    /***********************************/
-
-    /***********************************/
-    /* External signature methods      */
-    /***********************************/
-
-    @Before
-    public void setUp() throws Exception {
-        g = ResourceFactory.createResource( "http://test.com/g" ).asNode();
-        s = ResourceFactory.createResource( "http://test.com/s" ).asNode();
-        p = ResourceFactory.createResource( "http://test.com/p" ).asNode();
-        o = ResourceFactory.createResource( "http://test.com/o" ).asNode();
-        l = ResourceFactory.createPlainLiteral( "foo" ).asNode();
-
-        ed_noG = new EntityDefinition( "entity", "primary" );
-        ed_withG = new EntityDefinition( "entity", "primary", "graph" );
+    private Node node(String uri) {
+    	return ResourceFactory.createResource(uri).asNode();
+    }
+    
+    private Node literal(String form) {
+    	return ResourceFactory.createPlainLiteral(form).asNode();
     }
 
     @Test
@@ -139,19 +121,11 @@ public class ExtendedEntityTest
         assertFalse( xe.addProperty( ed_withG, p, l ));
 
         ed_withG.set( "foo_field", p );
+        log.info("Expecting a logged WARN message about foo_field");
         assertFalse( xe.addProperty( ed_withG, p, o ));
         assertTrue( xe.addProperty( ed_withG, p, l ));
 
         assertEquals( "foo", xe.get( "foo_field" ));
     }
-
-    /***********************************/
-    /* Internal implementation methods */
-    /***********************************/
-
-    /***********************************/
-    /* Inner class definitions         */
-    /***********************************/
-
 }
 

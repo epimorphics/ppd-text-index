@@ -18,6 +18,7 @@
 
 package com.epimorphics.lr.jena.query.text;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
@@ -72,6 +73,10 @@ public class TextDocProducerBatch
         this.indexer = textIndex;
         log.debug( "Initialising TextDocProducerBatch" );
     }
+    
+    public TextDocProducerBatch( TextIndex textIndex ) {
+    	this(null, textIndex);
+    }
 
     /***********************************/
     /* External signature methods      */
@@ -95,23 +100,26 @@ public class TextDocProducerBatch
     @Override
     public void start() {
         log.debug( "TextDocProducerBatch.start()" );
-        indexer.startIndexing();
+        // indexer.startIndexing();
         startNewBatch( true );
     }
 
     @Override
     public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
-        if (queueAdd) {
+        flush();
+    }
+
+	public void flush() {
+        log.debug( "TextDocProducerBatch.flush()" );
+		if (queueAdd) {
             addBatch();
         }
         else {
             removeBatch();
         }
-
-        startNewBatch( true );
-        indexer.finishIndexing();
-    }
+		startNewBatch( true );
+	}
 
     @Override
     public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
@@ -219,8 +227,12 @@ public class TextDocProducerBatch
      */
     protected void removeLuceneDocument( TextIndexLucene indexerLucene ) {
         String key = currentSubject.isBlank() ? currentSubject.getBlankNodeLabel() : currentSubject.getURI();
-        indexerLucene.deleteDocuments( new Term( "uri", key ) );
-
+        try {
+			indexerLucene.getIndexWriter().deleteDocuments( new Term( "uri", key ) );
+		} catch (IOException e) {
+			throw new TextIndexException(e);
+		}
+        
         // there may be triples left that have current subject as subject
         // we need to put those back
         ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );

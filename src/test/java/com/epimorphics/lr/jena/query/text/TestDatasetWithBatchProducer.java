@@ -12,11 +12,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.jena.atlas.lib.StrUtils;
+import org.apache.jena.query.text.DatasetGraphText;
 import org.apache.jena.query.text.TextQuery;
 import org.apache.jena.query.text.assembler.TextAssembler;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.assembler.Assembler;
 import com.hp.hpl.jena.query.Dataset;
@@ -35,14 +40,18 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * Unit tests for a dataset that specifies a non-default document producer.
  */
 public class TestDatasetWithBatchProducer {
-    private static final String INDEX_PATH = "target/test/TestDatasetWithLuceneIndex";
+    
+	private static final String INDEX_PATH = "target/test/TestDatasetWithLuceneIndex";
     private static final File indexDir = new File(INDEX_PATH);
 
     private static final String SPEC_BASE = "http://example.org/spec#";
     private static final String SPEC_ROOT_LOCAL = "lucene_text_dataset";
     private static final String SPEC_ROOT_URI = SPEC_BASE + SPEC_ROOT_LOCAL;
     private static final String SPEC;
-    private static Dataset dataset;
+
+    private static Logger log = LoggerFactory.getLogger( TestDatasetWithBatchProducer.class );
+    private Dataset dataset;
+    
     static {
         SPEC = StrUtils.strjoinNL(
                     "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ",
@@ -59,7 +68,7 @@ public class TestDatasetWithBatchProducer {
                     "    a              text:TextDataset ;",
                     "    text:dataset   :dataset ;",
                     "    text:index     :indexLucene ;",
-                    "    text:docProducer '" + TextDocProducerBatch.class.getCanonicalName() + "'",
+                    "    text:textDocProducer <java:" + TextDocProducerBatch.class.getCanonicalName() + ">",
                     "    .",
                     "",
                     ":dataset",
@@ -89,8 +98,8 @@ public class TestDatasetWithBatchProducer {
                     );
     }
 
-    @BeforeClass
-    public static void init() {
+    @Before
+    public void init() {
         Reader reader = new StringReader(SPEC);
         Model specModel = ModelFactory.createDefaultModel();
         specModel.read(reader, "", "TURTLE");
@@ -99,6 +108,15 @@ public class TestDatasetWithBatchProducer {
         indexDir.mkdirs();
         Resource root = specModel.getResource(SPEC_ROOT_URI);
         dataset = (Dataset) Assembler.general.open(root);
+    }
+    
+    @After 
+    public void closeDataset() {
+    	if (dataset == null) {
+    		log.warn("dataset was not set up");
+    	} else {
+    		dataset.close();
+    	}
     }
 
     @AfterClass
@@ -110,12 +128,12 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testConfiguresBatchProducer() {
-        assertTrue(dataset.getContext().get(TextQuery.docProducer) instanceof TextDocProducerBatch );
+        DatasetGraphText dsgText = (DatasetGraphText)dataset.asDatasetGraph() ;
+        assertTrue(dsgText.getMonitor() instanceof TextDocProducerBatch) ;
     }
 
     @Test
     public void testEmptyUpdate() {
-        init();
         dataset.begin(ReadWrite.WRITE);
         dataset.getDefaultModel();
         dataset.commit();
@@ -124,7 +142,6 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testSimpleQuery() {
-        init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
         Resource subject =
@@ -146,7 +163,6 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testProducerSeparatesResources() {
-        init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
         Resource subject1 =
@@ -172,7 +188,6 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testConjunctiveQueryAcrossFields() {
-        init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
         Resource subject =
@@ -194,7 +209,6 @@ public class TestDatasetWithBatchProducer {
 
     @Test
     public void testProducerMergesExistingProperties() {
-        init();
         dataset.begin(ReadWrite.WRITE);
         Model model = dataset.getDefaultModel();
         Resource subject1 =

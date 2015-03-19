@@ -9,10 +9,6 @@
 
 package com.epimorphics.lr.jena.query.text;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -24,52 +20,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.file.Location;
-import com.hp.hpl.jena.update.*;
 
 /**
  * Functional test for test indexing, covering building an index from scratch
  * and updating the index using SPARQL updates (which is how the PPD index
  * gets updated).
  */
-public class FunctionalTest
-{
-    /***********************************/
-    /* Constants                       */
-    /***********************************/
-
-    static final String TEST_RESOURCES = "src/test/resources/";
-
-    static final String TDB_TEST_ROOT = "target/tdb-testing";
-    static final String TDB_INDEX_ROOT = TDB_TEST_ROOT + "-index";
-
-    static final String ASSEMBLER_CONFIG = "config-ppd-text.ttl";
-
-    static final String TEXT_CONFIG_NS = "http://epimorphics.com/test/functional/ppd-text";
-
-    static final String TEXT_CONFIG_ROOT = TEXT_CONFIG_NS + "#ds-with-lucene";
-
-    static final String PPD_BASE_TEST_DATA = "landregistry_sample.nq";
-
-
+public class FunctionalTest extends SharedIndexTestSupport {
+	
     /***********************************/
     /* Static variables                */
     /***********************************/
 
     private static final Logger log = LoggerFactory.getLogger( FunctionalTest.class );
-
-    /***********************************/
-    /* Instance variables              */
-    /***********************************/
-
-    /** TDB dataset with assembler */
-    Dataset ds;
-
-    /***********************************/
-    /* Constructors                    */
-    /***********************************/
 
     /***********************************/
     /* External signature methods      */
@@ -108,6 +73,11 @@ public class FunctionalTest
 
         ds = loadDataset( ASSEMBLER_CONFIG, PPD_BASE_TEST_DATA );
     }
+    
+    @After 
+    public void closeDataset() {
+    	ds.close();
+    }
 
     /**
      * Test that the base dataset is indexed as it is loaded.
@@ -140,7 +110,7 @@ public class FunctionalTest
     @Test
     public void testIndexIncrementalAdd() {
         testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
-        updateData( ds, loadQuery( TEST_RESOURCES + "update-add.sparql" ) );
+        SharedIndexTestSupport.updateData( ds, loadQuery( TEST_RESOURCES + "update-add.sparql" ) );
         testQueryPostcodeCount( "query-with-stop-word.sparql", "PAT JESS", 8 );
     }
 
@@ -150,7 +120,7 @@ public class FunctionalTest
     @Test
     public void testIndexIncrementalDelete() {
         testQueryPostcodeCount( "query-with-stop-word.sparql", "BB12 8NQ", 7 );
-        updateData( ds, loadQuery( TEST_RESOURCES + "update-delete.sparql" ) );
+        SharedIndexTestSupport.updateData( ds, loadQuery( TEST_RESOURCES + "update-delete.sparql" ) );
         testQueryPostcodeCount( "query-with-stop-word.sparql", "AL9 5DQ", 6 );
     }
 
@@ -159,47 +129,11 @@ public class FunctionalTest
     /***********************************/
 
     /**
-     * Perform a test query as a select, and check that the results include a certain address
-     * (identified by postcode) and matches a certain number of results
-     *
-     * @param sparql
-     * @param expectedPostcode
-     * @param expectedHits
-     */
-    public void testQueryPostcodeCount( String sparql, String expectedPostcode, int expectedHits ) {
-        ResultSet results = queryData( ds, loadQuery( TEST_RESOURCES + sparql ) );
-        assertTrue( "Query failed to return any results", results.hasNext() );
-
-        int n = 0;
-        boolean seenPostcode = false;
-
-        while (results.hasNext()) {
-            QuerySolution soln = results.next();
-            n++;
-
-            Literal l = soln.getLiteral( "ppd_propertyAddressPostcode" );
-            String postcode = (l == null) ? null : l.getLexicalForm();
-            seenPostcode = seenPostcode || (postcode != null && postcode.equals( expectedPostcode ));
-        }
-
-        assertTrue( "Expected to see postcode " + expectedPostcode, seenPostcode );
-        assertEquals( "Expected " + expectedHits + " results", expectedHits, n );
-    }
-
-    /**
-     * @return A dataset given an assembler description
-     */
-    public Dataset createDsFromAssembler( String assemblerFile ) {
-        return DatasetFactory.assemble( TEST_RESOURCES + assemblerFile, TEXT_CONFIG_ROOT );
-    }
-
-    /**
      * Load a datafile into a newly created dataset, specified by the given assembler file
      * @param assemblerFile
      * @param dataFile
      * @return
      */
-    @SuppressWarnings( "hiding" )
     public Dataset loadDataset( String assemblerFile, String dataFile ) {
         Dataset ds = null;
         try {
@@ -226,62 +160,5 @@ public class FunctionalTest
         return ds;
     }
 
-    /**
-     * @return The resultset from running the given sparql query against the given dataset
-     */
-    @SuppressWarnings( "hiding" )
-    public ResultSet queryData( Dataset ds, String sparql ) {
-        ds.begin(ReadWrite.READ) ;
-        ResultSet rs = null;
-
-        try {
-            Query q = QueryFactory.create( sparql );
-            rs = QueryExecutionFactory.create( q, ds ).execSelect();
-        }
-        finally {
-            ds.end() ;
-        }
-
-        return rs;
-    }
-
-    /**
-     * Load a sparql query from a file
-     * @param queryFile
-     * @return
-     */
-    public String loadQuery( String queryFile ) {
-        try {
-            File file = new File( queryFile );
-            assertTrue( "Query file does not exist: " + queryFile, file.exists() );
-
-            return FileUtils.readFileToString( file );
-        }
-        catch (IOException e) {
-            log.error( e.getMessage(), e );
-            throw new RuntimeException( e );
-        }
-    }
-
-    /**
-     * Perform a sparql update
-     */
-    @SuppressWarnings( "hiding" )
-    public void updateData( Dataset ds, String sparql ) {
-        ds.begin(ReadWrite.WRITE) ;
-
-        try {
-            GraphStore graphStore = GraphStoreFactory.create(ds) ;
-            UpdateAction.parseExecute( sparql, graphStore ) ;
-            ds.commit() ;
-        }
-        finally {
-            ds.end() ;
-        }
-    }
-
-    /***********************************/
-    /* Inner class definitions         */
-    /***********************************/
 
 }
