@@ -18,6 +18,7 @@
 
 package com.epimorphics.lr.jena.query.text;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
@@ -226,7 +227,12 @@ public class TextDocProducerBatch
      */
     protected void removeLuceneDocument( TextIndexLucene indexerLucene ) {
         String key = currentSubject.isBlank() ? currentSubject.getBlankNodeLabel() : currentSubject.getURI();
-        indexerLucene.deleteDocuments( new Term( "uri", key ) );
+        
+        try {
+			indexerLucene.getIndexWriter().deleteDocuments( new Term( "uri", key ) );
+		} catch (IOException e) {
+			throw new TextIndexException();
+		}
 
         // there may be triples left that have current subject as subject
         // we need to put those back
