@@ -227,7 +227,6 @@ public class TextDocProducerBatch
      */
     protected void removeLuceneDocument( TextIndexLucene indexerLucene ) {
         String key = currentSubject.isBlank() ? currentSubject.getBlankNodeLabel() : currentSubject.getURI();
-        
         try {
 			indexerLucene.getIndexWriter().deleteDocuments( new Term( "uri", key ) );
 		} catch (IOException e) {
