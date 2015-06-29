@@ -17,8 +17,6 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.update.GraphStore;
-import org.apache.jena.update.GraphStoreFactory;
 import org.apache.jena.update.UpdateAction;
 
 import static org.junit.Assert.assertEquals;
@@ -89,8 +87,7 @@ public class SharedIndexTestSupport {
 	    ds.begin(ReadWrite.WRITE) ;
 	
 	    try {
-	        GraphStore graphStore = GraphStoreFactory.create(ds) ;
-	        UpdateAction.parseExecute( sparql, graphStore ) ;
+	        UpdateAction.parseExecute( sparql, ds ) ;
 	        ds.commit() ;
 	    }
 	    finally {

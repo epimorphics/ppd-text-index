@@ -18,9 +18,7 @@ package com.epimorphics.lr.jena.query.text;
 
 import static org.junit.Assert.*;
 
-import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.text.EntityDefinition;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,7 @@ import org.apache.jena.sparql.core.Quad;
  */
 public class ExtendedEntityTest
 {    
-	private static final Logger log = LoggerFactory.getLogger( FunctionalTest.class );
+	private static final Logger log = LoggerFactory.getLogger( ExtendedEntityTest.class );
 
 	private final Node s = node("http://test.com/s");
     private final Node p = node("http://test.com/p");

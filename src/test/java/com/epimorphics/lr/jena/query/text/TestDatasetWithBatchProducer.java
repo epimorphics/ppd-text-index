@@ -13,12 +13,10 @@ import java.util.Set;
 
 import org.apache.jena.atlas.lib.StrUtils;
 import org.apache.jena.query.text.DatasetGraphText;
-import org.apache.jena.query.text.TextQuery;
 import org.apache.jena.query.text.assembler.TextAssembler;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -251,7 +249,6 @@ public class TestDatasetWithBatchProducer {
         dir.delete() ;
     }
 
-    @SuppressWarnings( "hiding" )
     private static void doTestQuery(Dataset dataset, String label, String queryString, Set<String> expectedEntityURIs, int expectedNumResults) {
         Query query = QueryFactory.create(queryString) ;
         QueryExecution qexec = QueryExecutionFactory.create(query, dataset) ;
