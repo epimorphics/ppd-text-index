@@ -25,9 +25,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.sparql.core.Quad;
+import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.core.Quad;
 
 /**
  * Unit tests for {@link ExtendedEntity}

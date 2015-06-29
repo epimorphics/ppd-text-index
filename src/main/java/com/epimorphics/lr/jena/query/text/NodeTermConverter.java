@@ -20,9 +20,9 @@ package com.epimorphics.lr.jena.query.text;
 
 import org.apache.jena.query.text.TextIndexException;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.rdf.model.AnonId;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.rdf.model.AnonId;
 
 /**
  * Utility methods for converting between {@link Node}s and string terms that

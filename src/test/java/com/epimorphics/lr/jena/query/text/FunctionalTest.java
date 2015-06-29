@@ -19,9 +19,9 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.tdb.StoreConnection;
-import com.hp.hpl.jena.tdb.base.file.Location;
+import org.apache.jena.query.*;
+import org.apache.jena.tdb.StoreConnection;
+import org.apache.jena.tdb.base.file.Location;
 
 /**
  * Functional test for test indexing, covering building an index from scratch

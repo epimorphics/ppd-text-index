@@ -14,8 +14,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.tdb.StoreConnection;
-import com.hp.hpl.jena.tdb.base.file.Location;
+import org.apache.jena.tdb.StoreConnection;
+import org.apache.jena.tdb.base.file.Location;
 
 public class TestTextIndexingCommand extends SharedIndexTestSupport {
 	

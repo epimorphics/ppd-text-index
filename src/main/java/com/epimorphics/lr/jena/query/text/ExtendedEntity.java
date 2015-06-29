@@ -16,9 +16,9 @@ package com.epimorphics.lr.jena.query.text;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.text.*;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.util.FmtUtils;
 
 /**
  * Facade-pattern wrapper for {@link Entity}, which allows entities to

@@ -26,13 +26,13 @@ import org.apache.jena.query.text.TextQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import arq.cmd.CmdException;
-import arq.cmdline.ArgDecl;
+import jena.cmd.CmdException;
+import jena.cmd.ArgDecl;
 import arq.cmdline.CmdARQ;
 
 import com.epimorphics.lr.jena.query.text.ProgressMonitor;
 import com.epimorphics.lr.jena.query.text.TextIndexer;
-import com.hp.hpl.jena.query.Dataset;
+import org.apache.jena.query.Dataset;
 
 /**
  * Text indexer application that will read a dataset and index its triples in

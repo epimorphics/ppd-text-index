@@ -25,9 +25,8 @@ import org.apache.jena.query.text.*;
 import org.apache.lucene.index.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.*;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.*;
 
 /**
  * This document producer batches up consecutive sequences of quads with the
