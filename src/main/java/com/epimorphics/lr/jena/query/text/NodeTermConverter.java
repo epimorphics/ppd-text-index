@@ -22,7 +22,6 @@ import org.apache.jena.query.text.TextIndexException;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.rdf.model.AnonId;
 
 /**
  * Utility methods for converting between {@link Node}s and string terms that
@@ -79,7 +78,7 @@ public class NodeTermConverter
      */
     public static Node termToNode( String v ) {
         if (v.startsWith( ANON_NODE_PREFIX )) {
-            return NodeFactory.createAnon( new AnonId( v.substring( ANON_NODE_PREFIX.length() ) ) );
+            return NodeFactory.createBlankNode( v.substring( ANON_NODE_PREFIX.length() ) );
         }
         else {
             return NodeFactory.createURI( v );

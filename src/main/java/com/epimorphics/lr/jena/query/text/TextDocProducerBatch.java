@@ -139,6 +139,11 @@ public class TextDocProducerBatch
         }
     }
 
+	@Override public void reset() {
+		// Don't think we need anything here, depends on details of the
+		// DatsetChange contract really.
+	}
+
     /***********************************/
     /* Internal implementation methods */
     /***********************************/
