@@ -55,13 +55,40 @@ public class TextDocProducerBatch
     private TextIndex indexer;
     private DatasetGraph dsg;
 
-    List<Quad> queue = new ArrayList<Quad>();
+    /**
+    	Type for thread-local state used by batching.
+    */
+    static class State {
 
-    /* If true, the queue contains quads to add, otherwise quads to remove */
-    boolean queueAdd = true;
+        List<Quad> queue = new ArrayList<Quad>();
 
-    /* The subject currently being processed, to detect subject change boundaries */
-    Node currentSubject;
+        /* If true, the queue contains quads to add, otherwise quads to remove */
+        boolean queueAdd = true;
+
+        /* The subject currently being processed, to detect subject change boundaries */
+        Node currentSubject;
+
+		public void start() {
+			clear();
+		}
+		
+		public void finish() {
+			clear();
+		}
+		
+		protected void clear() {
+			queue.clear();
+			queueAdd = true;
+			currentSubject = null;
+		}
+        
+    }
+    
+    protected ThreadLocal<State> state = new ThreadLocal<State>() {
+    	@Override protected State initialValue() {
+    		return new State();
+    	}    	
+    };
 
     /***********************************/
     /* Constructors                    */
@@ -96,28 +123,34 @@ public class TextDocProducerBatch
         return indexer.getDocDef();
     }
 
-    @Override
-    public void start() {
+    static int count = 0;
+    int index = ++count;
+    
+    @Override public void start() {
+    	State s = state.get();
         log.debug( "TextDocProducerBatch.start()" );
+//        System.err.println(">> start: index = " + index);
+//        System.err.println(">>    " + Thread.currentThread());
+        s.start();
         // indexer.startIndexing();
-        startNewBatch( true );
+        startNewBatch( s, true );
     }
 
-    @Override
-    public void finish() {
+    @Override public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
         flush();
     }
 
 	public void flush() {
         log.debug( "TextDocProducerBatch.flush()" );
-		if (queueAdd) {
-            addBatch();
+        State s = state.get();
+		if (s.queueAdd) {
+            addBatch(s);
         }
         else {
-            removeBatch();
+            removeBatch(s);
         }
-		startNewBatch( true );
+		startNewBatch( s, true );
 	}
 
     @Override
@@ -128,10 +161,10 @@ public class TextDocProducerBatch
                 indexNewQuad( quad );
                 break;
             case DELETE:
-                unIndex( quad );
+                unIndex( state.get(), quad );
                 break;
             case NO_ADD:
-                log.warn( "Saw change action NO_ADD, but ignoring it!" );
+//                log.warn( "Saw change action NO_ADD, but ignoring it!" );
                 break;
             case NO_DELETE:
                 log.warn( "Saw change action NO_DELETE, but ignoring it!" );
@@ -149,42 +182,43 @@ public class TextDocProducerBatch
     /***********************************/
 
     protected void indexNewQuad( Quad quad ) {
-        if (currentSubject == null) {
-            currentSubject = quad.getSubject();
+    	State s = state.get();
+        if (s.currentSubject == null) {
+        	s.currentSubject = quad.getSubject();
         }
 
-        checkBatchBoundary( quad.getSubject(), true );
-        queue.add( quad );
+        checkBatchBoundary( s, quad.getSubject(), true );
+        s.queue.add( quad );
     }
 
-    protected void checkBatchBoundary( Node subject, boolean add ) {
-        if (!(currentSubject.equals( subject ) && queueAdd == add)) {
+    protected void checkBatchBoundary( State s, Node subject, boolean add ) {
+        if (!(s.currentSubject.equals( subject ) && s.queueAdd == add)) {
             if (add) {
-                addBatch();
+                addBatch(s);
             }
             else {
-                removeBatch();
+                removeBatch(s);
             }
-            startNewBatch( add );
-            currentSubject = subject;
+            startNewBatch( s, add );
+            s.currentSubject = subject;
         }
     }
 
-    protected void startNewBatch( boolean add ) {
-        queue.clear();
-        currentSubject = null;
-        queueAdd = add;
+    protected void startNewBatch( State s, boolean add ) {
+    	s.queue.clear();
+    	s.currentSubject = null;
+    	s.queueAdd = add;
     }
 
-    protected void addBatch() {
-        if (currentSubject != null && !queue.isEmpty()) {
-            log.debug( "TextDocProducerBatch adding new batch for " + currentSubject );
-            ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
-            int count = addQuads( queue.iterator(), entity );
+    protected void addBatch(State s) {
+        if (s.currentSubject != null && !s.queue.isEmpty()) {
+            log.debug( "TextDocProducerBatch adding new batch for " + s.currentSubject );
+            ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, s.currentSubject );
+            int count = addQuads( state.get().queue.iterator(), entity );
             if (count > 0) {
                 // add pre-existing fields to the entity
                 // TODO check: should include graph ID in the find() here??
-                count += addQuads( dsg.find( null, currentSubject, null, null ), entity );
+                count += addQuads( dsg.find( null, s.currentSubject, null, null ), entity );
                 indexer.updateEntity( entity );
             }
         }
@@ -208,13 +242,13 @@ public class TextDocProducerBatch
      * Remove a batch of quads that we have queued up. All of the quads will have the same
      * subject. Currently only works for Lucene indexes.
      */
-    protected void removeBatch() {
-        if (currentSubject != null && !queue.isEmpty()) {
-            log.debug( "TextDocProducerBatch unindexing document for " + currentSubject );
+    protected void removeBatch(State s) {
+        if (s.currentSubject != null && !s.queue.isEmpty()) {
+            log.debug( "TextDocProducerBatch unindexing document for " + s.currentSubject );
 
             // TODO needs some work to make this a general capability
             if (indexer instanceof TextIndexLucene) {
-                removeLuceneDocument( (TextIndexLucene) indexer );
+                removeLuceneDocument( s, (TextIndexLucene) indexer );
             }
             else {
                 log.warn( "Sorry, deleting is not yet supported on " + indexer.getClass().getName() );
@@ -229,8 +263,8 @@ public class TextDocProducerBatch
      *
      * @param indexerLucene
      */
-    protected void removeLuceneDocument( TextIndexLucene indexerLucene ) {
-        String key = currentSubject.isBlank() ? currentSubject.getBlankNodeLabel() : currentSubject.getURI();
+    protected void removeLuceneDocument( State s, TextIndexLucene indexerLucene ) {
+        String key = s.currentSubject.isBlank() ? s.currentSubject.getBlankNodeLabel() : s.currentSubject.getURI();
         try {
 			indexerLucene.getIndexWriter().deleteDocuments( new Term( "uri", key ) );
 		} catch (IOException e) {
@@ -239,10 +273,10 @@ public class TextDocProducerBatch
         
         // there may be triples left that have current subject as subject
         // we need to put those back
-        ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, currentSubject );
+        ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, s.currentSubject );
 
         // TODO check: should include graph ID in the find() here??
-        int count = addQuads( dsg.find( null, currentSubject, null, null ), entity );
+        int count = addQuads( dsg.find( null, s.currentSubject, null, null ), entity );
         if (count > 0) {
             indexer.updateEntity( entity );
         }
@@ -254,13 +288,13 @@ public class TextDocProducerBatch
      * and re-add a document if any properties remain for the subject.
      * @param quad The quad being removed by this change event
      */
-    protected void unIndex( Quad quad ) {
-        if (currentSubject == null) {
-            currentSubject = quad.getSubject();
+    protected void unIndex( State s, Quad quad ) {
+        if (s.currentSubject == null) {
+        	s.currentSubject = quad.getSubject();
         }
 
-        checkBatchBoundary( quad.getSubject(), false );
-        queue.add( quad );
+        checkBatchBoundary( s, quad.getSubject(), false );
+        state.get().queue.add( quad );
     }
 
     /***********************************/
