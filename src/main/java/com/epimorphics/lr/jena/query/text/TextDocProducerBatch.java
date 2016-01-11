@@ -86,6 +86,11 @@ public class TextDocProducerBatch
     public void setDatasetGraph( DatasetGraph dsg ) {
         this.dsg = dsg;
     }
+    
+    // Only for testing
+    public ThreadLocal<BatchState> exposeBatchState() {
+    	return state;
+    }
 
     /**
      * @return The entity definition for the current indexer
@@ -124,8 +129,7 @@ public class TextDocProducerBatch
 		s.reset(true, null);
 	}
 
-    @Override
-    public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
+    @Override public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
         Quad quad = new Quad( g, s, p, o );
         switch( qaction ) {
             case ADD:
