@@ -108,6 +108,9 @@ public class TextDocProducerBatch
     @Override public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
         flush();
+        BatchState s = state.get();
+        state.set(null);
+        state.remove();
     }
 
 	public void flush() {
