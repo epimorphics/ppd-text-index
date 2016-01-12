@@ -208,7 +208,7 @@ public class TestBatchThreadSafety {
 	@Test public void testSafety() throws InterruptedException {
 		TextIndex ti = new TextIndexTesting();
 		DatasetGraph dsg = new DatasetGraphTesting();
-		TextDocProducerBatch b = new TextDocProducerBatch(dsg, ti);
+		final TextDocProducerBatch b = new TextDocProducerBatch(dsg, ti);
 		for (int i = 0; i < 10; i += 1) {
 			System.gc(); 
 			System.gc(); 
