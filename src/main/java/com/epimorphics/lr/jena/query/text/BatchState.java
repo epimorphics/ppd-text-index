@@ -11,10 +11,11 @@ import org.apache.jena.sparql.core.Quad;
 */
 public class BatchState {
 
+	public static enum Mode {NONE, ADD, DELETE}
+	
     List<Quad> queue = new ArrayList<Quad>();
 
-    /* If true, the queue contains quads to add, otherwise quads to remove */
-    boolean queueAdd = true;
+    Mode queueMode = Mode.NONE;
 
     /* The subject currently being processed, to detect subject change boundaries */
     Node currentSubject;
@@ -29,20 +30,19 @@ public class BatchState {
 	
 	protected void clear() {
 		queue.clear();
-		queueAdd = true;
+		queueMode = Mode.NONE;
 		currentSubject = null;
 	}
 	
-	/** clear the quere and set current subject and add mode */
-	protected void reset(boolean queueAdd, Node currentSubject) {
+	/** clear the queue and set current subject and add mode */
+	protected void reset(Mode queueMode, Node currentSubject) {
 		queue.clear();
-		this.queueAdd = queueAdd;
+		this.queueMode = queueMode;
 		this.currentSubject = currentSubject;
 	}
 
 	/** true iff there is a subject and some quads queued up. */
 	public boolean hasBatch() {
-		// TODO Auto-generated method stub
 		return currentSubject != null && !queue.isEmpty();
 	}
     

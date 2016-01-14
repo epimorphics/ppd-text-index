@@ -25,6 +25,9 @@ import org.apache.jena.query.text.*;
 import org.apache.lucene.index.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.epimorphics.lr.jena.query.text.BatchState.Mode;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.*;
 
@@ -142,13 +145,13 @@ public class TextDocProducerBatch
 	public void flush() {
         log.debug( "TextDocProducerBatch.flush()" );
         BatchState s = state.get();
-		if (s.queueAdd) {
-            addBatch(s);
+		if (s.queueMode == Mode.ADD) {
+            addBatch(s, indexer);
         }
-        else {
-            removeBatch(s);
+        else if (s.queueMode == Mode.DELETE){
+            removeBatch(s, indexer);
         }
-		s.reset(true, null);
+		s.reset(Mode.NONE, null);
 	}
 
     @Override public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
@@ -186,28 +189,28 @@ public class TextDocProducerBatch
         	s.currentSubject = quad.getSubject();
         }
 
-        checkBatchBoundary( s, quad.getSubject(), true );
+        checkBatchBoundary( s, quad.getSubject(), Mode.ADD );
         s.queue.add( quad );
     }
 
-    protected void checkBatchBoundary( BatchState s, Node subject, boolean add ) {
-        if (!(s.currentSubject.equals( subject ) && s.queueAdd == add)) {
-            if (add) {
-                addBatch(s);
+    protected void checkBatchBoundary( BatchState s, Node subject, Mode queueMode ) {
+        if (!(s.currentSubject.equals( subject ) && s.queueMode == queueMode)) {
+            if (s.queueMode == Mode.ADD) {
+                addBatch(s, indexer);
             }
-            else {
-                removeBatch(s);
+            else if (s.queueMode == Mode.DELETE){
+                removeBatch(s, indexer);
             }
-			s.reset(add, subject);
+			s.reset(queueMode, subject);
         } else {
         }
     }
 
-    protected void startNewBatch( BatchState s, boolean add ) {
-    	s.reset(add, null);
+    protected void startNewBatch( BatchState s, Mode queueMode ) {
+    	s.reset(queueMode, null);
     }
 
-    protected void addBatch(BatchState s) {
+    protected void addBatch(BatchState s, TextIndex indexer) {
         if (s.hasBatch()) {
         	Node cs = s.currentSubject;
             log.debug( "TextDocProducerBatch adding new batch for " + cs );
@@ -240,7 +243,7 @@ public class TextDocProducerBatch
      * Remove a batch of quads that we have queued up. All of the quads will have the same
      * subject. Currently only works for Lucene indexes.
      */
-    protected void removeBatch(BatchState s) {
+    protected void removeBatch(BatchState s, TextIndex indexer) {
         if (s.currentSubject != null && !s.queue.isEmpty()) {
             log.debug( "TextDocProducerBatch unindexing document for " + s.currentSubject );
 
@@ -276,7 +279,7 @@ public class TextDocProducerBatch
         // TODO check: should include graph ID in the find() here??
         int count = addQuads( dsg.find( null, s.currentSubject, null, null ), entity );
         if (count > 0) {
-            indexer.updateEntity( entity );
+            indexerLucene.updateEntity( entity );
         }
     }
 
@@ -291,7 +294,7 @@ public class TextDocProducerBatch
         	s.currentSubject = quad.getSubject();
         }
 
-        checkBatchBoundary( s, quad.getSubject(), false );
+        checkBatchBoundary( s, quad.getSubject(), Mode.DELETE );
         s.queue.add( quad );
     }
 
