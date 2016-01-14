@@ -216,7 +216,6 @@ public class TextDocProducerBatch
             log.info( "TextDocProducerBatch adding new batch for " + s.queue );
             ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, cs );
             int count = addQuads( s.queue.iterator(), entity );
-            System.err.println(">> entity now " + entity);
             if (count > 0) {
                 // add pre-existing fields to the entity
                 // TODO check: should include graph ID in the find() here??
