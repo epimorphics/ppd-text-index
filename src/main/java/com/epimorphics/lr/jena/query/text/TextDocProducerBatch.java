@@ -29,28 +29,65 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.*;
 
 /**
- * This document producer batches up consecutive sequences of quads with the
- * same subject to add to the index as a single entity.
- * To deal with subjects that do not present consecutively, we search the
- * triple store for other triples with the same subject before updating the
- * text entity.
- */
+
+<p>
+	TextDocProducerBatch monitors quads as they are added and deleted
+	through the DatasetChanges interface it implements, and adjusts
+	the TextIndex according to literal objects. Multiple quads with the
+	same subject are dealt with together. In case such a batch isn't
+	complete, ie there are already existing literals for its subject,
+	we search the dataset graph for all relevant triples and allow
+	for their literals. 
+</p>
+
+<p>
+	Batch state is retained in a thread-local variable. The state
+	records the ongoing sequence of quads with the same subject
+	and mode (add <i>vs</i> delete quads). Initially this state
+	is an empty list of quads, a model boolean, and the current
+	subject (which is the subject of all the quads in the list). 
+</p>
+
+<p>
+	The DatasetChanges API contains the methods start(), finish(),
+	reset(), and change(). 
+</p>
+
+<p>
+	Calling start() announces that a new sequence of updates follows.
+	Any queued-up quads are discarded. A new batch state is created.
+</p>
+
+<p>
+	Calling finish() announces that the sequence of updates has finished.
+	Any pending quads are indexed. The batch state is discarded.	
+</p>
+
+<p>
+	change() announces another quad to be added or removed. The most recent
+	call to start() in this thread should not have been followed by a call to 
+	finish(). If this quad shares subject and mode with the current state,
+	then the quad is added to the pending quads. Otherwise the pending quads
+	are used to update the index before being discarded and this quad becomes
+	the first of the new pending quads.
+</p>
+
+<p>
+	reset() announces that whatever accumulated batch state there is should
+	be discarded without updating the index. (Complete batches will already
+	have been used to update the index.)
+</p>
+
+<p>
+	In normal use a TextDocProducerBatch sees API sequences of the
+	form <code>(start, change*, finish)*</code>.
+</p>
+
+*/
 public class TextDocProducerBatch
     implements TextDocProducer
 {
-    /***********************************/
-    /* Constants                       */
-    /***********************************/
-
-    /***********************************/
-    /* Static variables                */
-    /***********************************/
-
     private static Logger log = LoggerFactory.getLogger( TextDocProducerBatch.class );
-
-    /***********************************/
-    /* Instance variables              */
-    /***********************************/
 
     private TextIndex indexer;
     private DatasetGraph dsg;
@@ -61,10 +98,6 @@ public class TextDocProducerBatch
     	}    	
     };
 
-    /***********************************/
-    /* Constructors                    */
-    /***********************************/
-
     public TextDocProducerBatch( DatasetGraph dsg, TextIndex textIndex ) {
         this.dsg = dsg;
         this.indexer = textIndex;
@@ -74,11 +107,6 @@ public class TextDocProducerBatch
     public TextDocProducerBatch( TextIndex textIndex ) {
     	this(null, textIndex);
     }
-
-    /***********************************/
-    /* External signature methods      */
-    /***********************************/
-
     public void setTextIndex( TextIndex indexer ) {
         this.indexer = indexer;
     }
@@ -98,23 +126,17 @@ public class TextDocProducerBatch
     public EntityDefinition entityDefinition() {
         return indexer.getDocDef();
     }
-
-//    static int count = 0;
-//    int index = ++count;
     
     @Override public void start() {
     	BatchState s = state.get();
         log.debug( "TextDocProducerBatch.start()" );
         s.start();
         // indexer.startIndexing();
-        // s.reset(true, null);
     }
 
     @Override public void finish() {
         log.debug( "TextDocProducerBatch.finish()" );
-        flush();
-        state.set(null);
-        state.remove();
+        try { flush(); } finally { state.remove(); }
     }
 
 	public void flush() {
@@ -133,30 +155,32 @@ public class TextDocProducerBatch
         Quad quad = new Quad( g, s, p, o );
         switch( qaction ) {
             case ADD:
-                indexNewQuad( quad );
+                indexNewQuad( quad ); 
                 break;
+                
             case DELETE:
                 unIndex( state.get(), quad );
                 break;
+                
             case NO_ADD:
 //                log.warn( "Saw change action NO_ADD, but ignoring it!" );
                 break;
+                
             case NO_DELETE:
-                log.warn( "Saw change action NO_DELETE, but ignoring it!" );
+//                log.warn( "Saw change action NO_DELETE, but ignoring it!" );
                 break;
         }
     }
 
 	@Override public void reset() {
-		// Don't think we need anything here, depends on details of the
-		// DatsetChange contract really.
+		state.remove();
 	}
 
     /***********************************/
     /* Internal implementation methods */
     /***********************************/
 
-    protected void indexNewQuad( Quad quad ) {
+    protected void indexNewQuad( Quad quad ) { 	
     	BatchState s = state.get();
         if (s.currentSubject == null) {
         	s.currentSubject = quad.getSubject();
@@ -175,6 +199,7 @@ public class TextDocProducerBatch
                 removeBatch(s);
             }
 			s.reset(add, subject);
+        } else {
         }
     }
 
@@ -194,12 +219,13 @@ public class TextDocProducerBatch
                 count += addQuads( dsg.find( null, cs, null, null ), entity );
                 indexer.updateEntity( entity );
             }
+        } else {
+//        	System.err.println(">> no batch");
         }
     }
 
     protected int addQuads( Iterator<Quad> iter, ExtendedEntity entity ) {
         int count = 0;
-
         while (iter.hasNext()) {
             Quad quad = iter.next();
             boolean added = entity.addProperty( entityDefinition(), quad.getPredicate(), quad.getObject() );
@@ -207,7 +233,6 @@ public class TextDocProducerBatch
                 count++;
             }
         }
-
         return count;
     }
 
