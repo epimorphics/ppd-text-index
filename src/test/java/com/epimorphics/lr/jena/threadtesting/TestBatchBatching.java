@@ -80,9 +80,12 @@ public class TestBatchBatching {
 	
 	
 	// Unignoring requires creating ./DATASET/TDB.
-	@Test @Ignore public void testBatching() throws IOException {
+	@Test public void testBatching() throws IOException {
 		String root = "./DATASET";
 		String tdb_dir = root + "/TDB";
+		
+		new File(tdb_dir).mkdirs();
+		
 		Directory text_dir = FSDirectory.open(new File(root + "/textIndex"));
 		EntityDefinition entDef = new EntityDefinition("uri", "text", RDFS.label);
 		
