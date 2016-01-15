@@ -313,41 +313,6 @@ public class TestBatchThreadSafety {
 //		
 ////		System.err.println(">> state: " + b.exposeBatchState());
 	}
-	
-	
-	@Test public void testSafety() throws InterruptedException {
-		TextIndex ti = new TextIndexTesting();
-		DatasetGraph dsg = new DatasetGraphTesting();
-		final TextDocProducerBatch b = new TextDocProducerBatch(dsg, ti);
-		List<Thread> threads = new ArrayList<Thread>();
-		severalGCs();
-		showMemory();
-		for (int i = 0; i < 1000; i += 1) {
-			Thread t = new Thread(new Runnable() {
-
-				@Override public void run() {
-					b.start();
-					b.change(QuadAction.ADD, G, S1, P, O1);
-					b.finish();					
-				}
-				
-			});
-			threads.add(t);
-			t.start();
-		}
-		
-		for (Thread t: threads) t.join();
-		threads.clear();
-		severalGCs();
-		showMemory();
-		
-//		System.err.println(">> state: " + b.exposeBatchState());
-	}
-
-
-	private void showMemory() {
-		showMemory("");
-	}
 
 	private void showMemory(String title) {
 		severalGCs(); 

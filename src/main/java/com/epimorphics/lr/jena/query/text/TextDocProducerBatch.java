@@ -213,8 +213,8 @@ public class TextDocProducerBatch
     protected void addBatch(BatchState s, TextIndex indexer) {
         if (s.hasBatch()) {
         	Node cs = s.currentSubject;
-            log.info( "TextDocProducerBatch adding new batch for " + s.queue );
-            ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, cs );
+//            log.info( "TextDocProducerBatch adding new batch for " + s.queue );
+            ExtendedEntity entity = new ExtendedEntity( entityDefinition(), Mode.ADD, null, cs );
             int count = addQuads( s.queue.iterator(), entity );
             if (count > 0) {
                 // add pre-existing fields to the entity
@@ -274,7 +274,7 @@ public class TextDocProducerBatch
         
         // there may be triples left that have current subject as subject
         // we need to put those back
-        ExtendedEntity entity = new ExtendedEntity( entityDefinition(), null, s.currentSubject );
+        ExtendedEntity entity = new ExtendedEntity( entityDefinition(), Mode.DELETE, null, s.currentSubject );
 
         // TODO check: should include graph ID in the find() here??
         int count = addQuads( dsg.find( null, s.currentSubject, null, null ), entity );

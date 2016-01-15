@@ -23,9 +23,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.epimorphics.lr.jena.query.text.BatchState.Mode;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.QuadAction;
 
 /**
  * Unit tests for {@link ExtendedEntity}
@@ -54,19 +57,19 @@ public class ExtendedEntityTest
 
     @Test
     public void testExtendedEntityEntityDefinitionNodeNode() {
-        ExtendedEntity xe = new ExtendedEntity( ed_noG, null, s );
+        ExtendedEntity xe = new ExtendedEntity( ed_noG, Mode.NONE, null, s );
         assertEquals( "http://test.com/s", xe.getId() );
         assertNull( xe.getGraph() );
 
-        xe = new ExtendedEntity( ed_noG, g, s );
+        xe = new ExtendedEntity( ed_noG, Mode.NONE, g, s );
         assertEquals( "http://test.com/s", xe.getId() );
         assertEquals( "http://test.com/g", xe.getGraph() );
 
-        xe = new ExtendedEntity( ed_withG, null, s );
+        xe = new ExtendedEntity( ed_withG, Mode.NONE, null, s );
         assertEquals( "http://test.com/s", xe.getId() );
         assertNull( xe.getGraph() );
 
-        xe = new ExtendedEntity( ed_withG, g, s );
+        xe = new ExtendedEntity( ed_withG, Mode.NONE, g, s );
         assertEquals( "http://test.com/s", xe.getId() );
         assertEquals( "http://test.com/g", xe.getGraph() );
     }
@@ -74,45 +77,45 @@ public class ExtendedEntityTest
     @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_1() {
         // resource o is not suitable for indexing
-        new ExtendedEntity( ed_withG, g, s, p, o );
+        new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, o );
     }
 
     @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_2() {
         // no field for l
-        new ExtendedEntity( ed_withG, g, s, p, l );
+        new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, l );
     }
 
     @Test
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_3() {
         ed_withG.set( "foo_field", p );
-        ExtendedEntity xe = new ExtendedEntity( ed_withG, g, s, p, l );
+        ExtendedEntity xe = new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, l );
         assertEquals( "foo", xe.get( "foo_field" ));
     }
 
     @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionQuad_1() {
         Quad q = new Quad( g, s, p, o );
-        new ExtendedEntity( ed_withG, q );
+        new ExtendedEntity( ed_withG, Mode.NONE, q );
     }
 
     @Test (expected=NotSuitableForIndexingException.class)
     public void testExtendedEntityEntityDefinitionQuad_2() {
         Quad q = new Quad( g, s, p, l );
-        new ExtendedEntity( ed_withG, q );
+        new ExtendedEntity( ed_withG, Mode.NONE, q );
     }
 
     @Test
     public void testExtendedEntityEntityDefinitionQuad_3() {
         ed_withG.set( "foo_field", p );
         Quad q = new Quad( g, s, p, l );
-        ExtendedEntity xe = new ExtendedEntity( ed_withG, q );
+        ExtendedEntity xe = new ExtendedEntity( ed_withG, Mode.NONE, q );
         assertEquals( "foo", xe.get( "foo_field" ));
     }
 
     @Test
     public void testAddProperty() {
-        ExtendedEntity xe = new ExtendedEntity( ed_withG, g, s );
+        ExtendedEntity xe = new ExtendedEntity( ed_withG, Mode.NONE, g, s );
         assertNull( xe.get( "foo_field" ));
 
         assertFalse( xe.addProperty( ed_withG, p, o ));

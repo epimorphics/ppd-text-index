@@ -20,30 +20,22 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.FmtUtils;
 
+import com.epimorphics.lr.jena.query.text.BatchState.Mode;
+
 /**
  * Facade-pattern wrapper for {@link Entity}, which allows entities to
  * be created from nodes in graphs, and updated with additional
  * indexed fields over time.
  */
-public class ExtendedEntity
-extends Entity
+public class ExtendedEntity extends Entity
 {
-    /***********************************/
-    /* Constants                       */
-    /***********************************/
-
-    /***********************************/
-    /* Static variables                */
-    /***********************************/
-
-    /***********************************/
-    /* Instance variables              */
-    /***********************************/
-
-    /***********************************/
-    /* Constructors                    */
-    /***********************************/
-
+	/**
+		When an ExtendedEntity is created it records whether it is being
+		used for an ADD or DELETE operation, or NONE if it doesn't matter
+		(or is both). This is primarily to leave an trail for testing.
+	*/
+	final Mode mode;
+	
     /**
      * Construct a new extended entity from the given graph and subject nodes.
      *
@@ -51,9 +43,9 @@ extends Entity
      * @param g Node denoting the graph
      * @param s Node denoting the subject resource
      */
-    public ExtendedEntity( EntityDefinition defn, Node g, Node s ) {
+    public ExtendedEntity( EntityDefinition defn, Mode mode, Node g, Node s ) {
         super( NodeTermConverter.subjectToTerm( s ), NodeTermConverter.graphNodeToTerm( g ) );
-
+        this.mode = mode;
         String graphField = defn.getGraphField();
         if (defn.getGraphField() != null)
             put( graphField, NodeTermConverter.graphNodeToTerm( g ) );
@@ -70,8 +62,8 @@ extends Entity
      * @param o Node denoting the object
      * @exception NotSuitableForIndexingException if the node cannot be indexed
      */
-    public ExtendedEntity( EntityDefinition defn, Node g, Node s, Node p, Node o ) {
-        this( defn, g, s );
+    public ExtendedEntity( EntityDefinition defn, Mode mode, Node g, Node s, Node p, Node o ) {
+        this( defn, mode, g, s );
 
         if (!addProperty( defn, p, o )) {
             throw new NotSuitableForIndexingException();
@@ -86,12 +78,23 @@ extends Entity
      * @param quad Quad to be indexed
      * @exception NotSuitableForIndexingException if the quad cannot be indexed
      */
-    public ExtendedEntity( EntityDefinition defn, Quad quad ) {
-        this( defn, quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() );
+    public ExtendedEntity( EntityDefinition defn, Mode mode, Quad quad ) {
+        this( defn, mode, quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() );
+    }
+    
+    public boolean equals(Object other) {
+    	return other instanceof ExtendedEntity && same( (ExtendedEntity) other);
     }
 
+    /**
+     	This equality test is crude and only tests that the maps and the
+     	modes of the two ExtendedEntitys are equal.
+    */
+    private boolean same(ExtendedEntity other) {
+		return getMap().equals(other.getMap()) && mode == other.mode;
+	}
 
-    /***********************************/
+	/***********************************/
     /* External signature methods      */
     /***********************************/
 
@@ -123,14 +126,5 @@ extends Entity
 
         return success;
     }
-
-    /***********************************/
-    /* Internal implementation methods */
-    /***********************************/
-
-    /***********************************/
-    /* Inner class definitions         */
-    /***********************************/
-
 }
 

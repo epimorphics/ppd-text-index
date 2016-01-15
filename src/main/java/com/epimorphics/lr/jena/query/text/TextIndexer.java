@@ -10,6 +10,8 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 
+import com.epimorphics.lr.jena.query.text.BatchState.Mode;
+
 /**
  * Supervisor object for the process of creating a new text index for
  * a given dataset or graph.
@@ -126,7 +128,7 @@ public class TextIndexer
      * @param pm Optional progress monitor
      */
     protected void indexSubject( EntityDefinition def, Node g, Node s, TextIndex index, ProgressMonitor pm ) {
-        ExtendedEntity entity = new ExtendedEntity( def, g, s );
+        ExtendedEntity entity = new ExtendedEntity( def, Mode.ADD, g, s );
         int count = 0;
         see(g,s);
         for (Iterator<Quad> i = datasetGraph.find( g, s, null, null ); i.hasNext();) {
