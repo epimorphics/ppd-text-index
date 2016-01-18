@@ -18,6 +18,7 @@ import org.apache.jena.query.text.Entity;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextIndexConfig;
 import org.apache.jena.query.text.TextIndexLucene;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.QuadAction;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.RDFS;
@@ -101,9 +102,10 @@ public class TestBatchBatching {
 		//////////////////////////////////////////////////
 		
 		base.begin(ReadWrite.WRITE);
-		Graph g = base.getDefaultModel().getGraph();
+		Graph g = base.asDatasetGraph().getGraph(G);
 		List<Triple> content = g.find(Node.ANY, Node.ANY, Node.ANY).toList();
-		for (Triple c: content) g.delete(c);
+		for (Triple c: content)	
+			base.asDatasetGraph().delete(new Quad(G, c.getSubject(), c.getPredicate(), c.getObject()));
 		base.commit();
 		base.end();
 		
@@ -128,13 +130,13 @@ public class TestBatchBatching {
 		B.addProperty(entDef, P, O2);
 		B.addProperty(entDef, Q, O1);
 		
-		assertEquals(list("update", "update"), index.modeHistory);
+		assertEquals(list("update", "update"), index.modeHistory);		
 		assertEquals(list(A, B), index.entityHistory);
 
 		//////////////////////////////////////////////
 		
 		base.begin(ReadWrite.WRITE);
-		g.add(new Triple(S2, Q, O2));
+		base.asDatasetGraph().add(new Quad(G, S2, Q, O2));
 		base.commit();
 		base.end();
 		
@@ -145,16 +147,16 @@ public class TestBatchBatching {
 		b.change(QuadAction.DELETE, G, S2, Q, O2);
 		b.finish();
 		base.commit();
-		base.end();
+		base.end();		
 
 		ExtendedEntity C = new ExtendedEntity(entDef, Mode.ADD, G, S1); 
 		C.addProperty(entDef, P, O1);
 
 		ExtendedEntity D = new ExtendedEntity(entDef, Mode.DELETE, G, S2); 
 		D.addProperty(entDef, Q, O2);
-		
+
 		assertEquals(list("update", "update"), index.modeHistory);
-		assertEquals(list(C, D), index.entityHistory);
+		assertEquals(list(C, D), index.entityHistory);	
 		
 	}
 
