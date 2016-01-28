@@ -23,16 +23,18 @@ public class TestQueryByKey {
 		
 		TextIndexLucene ix = new TextIndexLucene(d, c);
 		
-		Node property = NodeFactory.createURI("eh:/P");
 		
-		Entity e = new Entity(property.getURI(), "what has it got in its pockets");
-		
-		System.err.println(ix.query(property, "*"));
-		
-		ix.addEntity(e);
-		
-		System.err.println(ix.query(property, "*"));		
-		
+//		Node property = NodeFactory.createURI("eh:/P");
+//		
+//		Entity e = new Entity(property.getURI(), "what has it got in its pockets");
+//		
+//		System.err.println(ix.query(property, "*"));
+//		
+//		ix.addEntity(e);
+//		
+//		System.err.println(ix.query(property, "*"));		
+		ix.commit();
 		ix.close();
+		
 	}
 }

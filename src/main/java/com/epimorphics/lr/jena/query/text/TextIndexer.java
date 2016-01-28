@@ -62,16 +62,24 @@ public class TextIndexer
         EntityDefinition entityDefinition = textIndex.getDocDef();
 
         // textIndex.startIndexing();
-
+        		
+        Node G = NodeFactory.createURI("eh:/G");
+        Node S = NodeFactory.createURI("eh:/S");
+        
         Iterator<Quad> quadIter = datasetGraph.find( Node.ANY, Node.ANY, Node.ANY, Node.ANY );
         while (quadIter.hasNext()) {
             Quad quad = quadIter.next();
             Node g = quad.getGraph();
             Node s = quad.getSubject();
-
-            if (!seen( g, s )) {
-                indexSubject( entityDefinition, g, s, textIndex, pm );
+            if (g.equals(G) && s.equals(S)) {
+            	// already processed this local subject
+            } else {
+            	// new graph/subject pair to process
+            	G = g;
+            	S = s;
+            	indexSubject( entityDefinition, g, s, textIndex, pm );
             }
+            
         }
 
         // textIndex.finishIndexing();
@@ -112,7 +120,7 @@ public class TextIndexer
      * @param g A node denoting a graph, or null
      * @param s A node denoting a subject
      */
-    protected void see( Node g, Node s ) {
+    protected void sexe( Node g, Node s ) {
         Node _g = (g == null) ? NULL_GRAPH_LABEL : g;
         indexed.get( _g ).add( s );
     }
@@ -130,7 +138,7 @@ public class TextIndexer
     protected void indexSubject( EntityDefinition def, Node g, Node s, TextIndex index, ProgressMonitor pm ) {
         ExtendedEntity entity = new ExtendedEntity( def, Mode.ADD, g, s );
         int count = 0;
-        see(g,s);
+        // see(g,s);
         for (Iterator<Quad> i = datasetGraph.find( g, s, null, null ); i.hasNext();) {
             Quad quad = i.next();
             if (entity.addProperty( def, quad.getPredicate(), quad.getObject() )) {
