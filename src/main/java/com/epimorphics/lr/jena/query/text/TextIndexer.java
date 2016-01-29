@@ -78,6 +78,53 @@ public class TextIndexer
 
         // textIndex.finishIndexing();
     }
+    
+    public void alternative_index_think_about_it( ProgressMonitor pm ) {
+        TextIndex textIndex = currentTextIndex( datasetGraph );
+        EntityDefinition ed = textIndex.getDocDef();
+
+        // textIndex.startIndexing();
+        		
+        Node G = NodeFactory.createURI("eh:/G");
+        Node S = NodeFactory.createURI("eh:/S");
+        
+        ExtendedEntity e = new ExtendedEntity(ed, Mode.ADD, G, S);
+        int count = 0;
+        
+        Iterator<Quad> quadIter = datasetGraph.find( Node.ANY, Node.ANY, Node.ANY, Node.ANY );
+        
+        /*
+            Iterate through all the quads. Assume that any given (Graph, Subject) properties
+            appear as a complete contiguous run. That means that we can accumulate a
+            new entity while we are reading those quads. When the (Graph, Subject) pair changes,
+            we can add the entity to the index and set up a new state with the new
+            graph and subject, a count of zero, and a new entity to update.
+         
+        */
+        while (quadIter.hasNext()) {
+            Quad quad = quadIter.next();
+            Node g = quad.getGraph(), s = quad.getSubject();
+            Node p = quad.getPredicate(), o = quad.getObject();
+            if (g.equals(G) && s.equals(S)) {
+				if (e.addProperty(ed, p, o)) {
+            		count += 1; 
+            	}
+            } else {
+            	if (count > 0) {
+            		textIndex.addEntity(e);
+            		if (pm != null) pm.progressByN(count);
+            	}
+            	G = g;
+            	S = s;
+            	count = 0;
+                e = new ExtendedEntity(ed, Mode.ADD, G, S);
+                e.addProperty(ed, p, o);
+            }
+            
+        }
+
+        // textIndex.finishIndexing();
+    }
 
     /**
      * @return The current text index
