@@ -21,12 +21,6 @@ public class TextIndexer
     /** The dataset graph we are processing */
     private DatasetGraphText datasetGraph;
 
-    /** There may already be a standard label for this, but if there is I can' find it */
-    private static final Node NULL_GRAPH_LABEL = NodeFactory.createURI( "____NULL" );
-
-    /** Multi-level map of graphs and subjects we have created index terms for */
-    private Map<Node,Set<Node>> indexed = new HashMap<Node, Set<Node>>();
-
     /**
      * Create an indexer for the given dataset
      * @param dataset A dataset to index
@@ -91,38 +85,6 @@ public class TextIndexer
      */
     protected TextIndex currentTextIndex( DatasetGraphText g ) {
         return g.getTextIndex();
-    }
-
-    /**
-     * Return true if pair graph g and node s have already been seen
-     * @param g A node denoting a graph, or null
-     * @param s A node denoting a subject
-     * @return True if we have already processed g-s as a pair
-     */
-    protected boolean seen( Node g, Node s ) {
-        boolean _seen = false;
-        Node _g = (g == null) ? NULL_GRAPH_LABEL : g;
-
-        Set<Node> subjects = indexed.get( _g );
-
-        if (subjects == null) {
-            indexed.put( _g, new HashSet<Node>() );
-        }
-        else {
-            _seen = subjects.contains( s );
-        }
-
-        return _seen;
-    }
-
-    /**
-     * Mark the pair of graph g and subject s as seen
-     * @param g A node denoting a graph, or null
-     * @param s A node denoting a subject
-     */
-    protected void sexe( Node g, Node s ) {
-        Node _g = (g == null) ? NULL_GRAPH_LABEL : g;
-        indexed.get( _g ).add( s );
     }
 
     /**
