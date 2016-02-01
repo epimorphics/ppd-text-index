@@ -46,11 +46,39 @@ public class TextIndexer
     }
 
     /**
-     * Perform the indexing of the graph/subject pairs in the {@link DatasetGraph}
-     * that this indexer was constructed with.
-     *
-     * @param pm If non-null, report incremental progress
-     */
+     	<p>
+    	Perform the indexing of the graph/subject pairs in the {@link DatasetGraph}
+    	that this indexer was constructed with.
+	</p>
+	
+	<p>
+		Iterate over all the quads in the dadatset. The first of a sequence of 
+		consecutive quads with the same graph and subject triggers an iteration 
+		over all the properties of that subject in that graph (<code>indexSubject</code>)
+		that creates an appropriate Entity and then pushes it into the index.
+		Second and subsequent elements of the sequence are ignored.
+	</p>
+	
+	<p>
+		Even in the case where quads arrive with random grouping, this will
+		correctly construct and insert complete entities, at the cost of
+		repeatedly doing <code>addEntity(e)</code> for equal <code>e's</code>.
+		However in practice quads from TDB arrive well-grouped (GSPO).
+	</p>
+	
+	<p>
+		Keeping a set of seen subject/graph pairs in an effort to avoid
+		multiple create-entity-then-inserts of the same subject causes
+		store use to grow linearly with the number of quads, eventually
+		running the text indexer out of room. So we no longer do that,
+		relying on the text index to contain only one entry for a subject
+		no matter how many times its entity gets added.
+	</p>
+	
+	<p>
+    	@param pm If non-null, report incremental progress
+    </p>
+    */
     public void index( ProgressMonitor pm ) {
         TextIndex textIndex = currentTextIndex( datasetGraph );
         EntityDefinition entityDefinition = textIndex.getDocDef();
