@@ -1,9 +1,10 @@
 package com.epimorphics.lr.jena.threadtesting;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.epimorphics.lr.jena.query.text.BatchState.Mode;
@@ -87,7 +87,7 @@ public class TestBatchBatching {
 		
 		new File(tdb_dir).mkdirs();
 		
-		Directory text_dir = FSDirectory.open(new File(root + "/textIndex"));
+		Directory text_dir = FSDirectory.open(FileSystems.getDefault().getPath(root, "textIndex"));
 		EntityDefinition entDef = new EntityDefinition("uri", "text", RDFS.label);
 		
 		entDef.set("Q",  Q);

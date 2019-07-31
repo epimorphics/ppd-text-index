@@ -1,11 +1,8 @@
 package com.epimorphics.lr.jena.query.text;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.query.text.Entity;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextIndexConfig;
 import org.apache.jena.query.text.TextIndexLucene;
@@ -17,7 +14,7 @@ public class TestQueryByKey {
 
 	@Test public void testIt() throws IOException {
 	
-		Directory d = FSDirectory.open(new File("." + "/textIndex"));
+		Directory d = FSDirectory.open(FileSystems.getDefault().getPath("." + "/textIndex"));
 		
 		TextIndexConfig c = new TextIndexConfig(new EntityDefinition("uri", "text"));
 		

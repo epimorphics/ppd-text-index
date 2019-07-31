@@ -51,7 +51,6 @@ public class textindexer
     protected EntityDefinition entityDefinition ;
 
     static public void main(String... argv) {
-        System.out.println(";;; -- ppd text indexer 2.0.5, using Jena 3.0.0 -------------------");
         TextQuery.init() ;
         new textindexer(argv).mainRun() ;
     }

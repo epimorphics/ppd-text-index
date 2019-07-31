@@ -11,6 +11,8 @@ import java.util.Random;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.TxnType;
 import org.apache.jena.query.text.Entity;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextHit;
@@ -64,15 +66,15 @@ public class TestBatchThreadSafety {
 			return null;
 		}
 
-		@Override public List<TextHit> query(Node property, String qs, int limit) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override public List<TextHit> query(Node property, String qs) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+//		@Override public List<TextHit> query(Node property, String qs, int limit) {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+//
+//		@Override public List<TextHit> query(Node property, String qs) {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
 
 		
 		static final EntityDefinition ed = new EntityDefinition
@@ -81,6 +83,24 @@ public class TestBatchThreadSafety {
 		
 		@Override public EntityDefinition getDocDef() {
 			return ed;
+		}
+
+		@Override
+		public List<TextHit> query(Node arg0, String arg1, String arg2, String arg3) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public List<TextHit> query(Node arg0, String arg1, String arg2, String arg3, int arg4) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public List<TextHit> query(Node arg0, String arg1, String arg2, String arg3, int arg4, String arg5) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 		
 	}
@@ -215,6 +235,72 @@ public class TestBatchThreadSafety {
 
 		@Override public void close() {
 			// TODO Auto-generated method stub
+		}
+
+		@Override
+		public void begin(TxnType type) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void begin(ReadWrite readWrite) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean promote(Promote mode) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void commit() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void abort() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void end() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public ReadWrite transactionMode() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public TxnType transactionType() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean isInTransaction() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Graph getUnionGraph() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean supportsTransactions() {
+			// TODO Auto-generated method stub
+			return false;
 		}
 		
 	}
