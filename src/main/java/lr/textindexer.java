@@ -18,6 +18,8 @@
 
 package lr ;
 
+import org.apache.jena.cmd.ArgDecl;
+import org.apache.jena.cmd.CmdException;
 import org.apache.jena.query.text.DatasetGraphText;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextDatasetFactory;
@@ -26,8 +28,6 @@ import org.apache.jena.query.text.TextQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jena.cmd.CmdException;
-import jena.cmd.ArgDecl;
 import arq.cmdline.CmdARQ;
 
 import com.epimorphics.lr.jena.query.text.ProgressMonitor;

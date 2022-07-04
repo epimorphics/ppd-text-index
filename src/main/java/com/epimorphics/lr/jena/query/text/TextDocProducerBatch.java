@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.apache.jena.query.text.*;
+import org.apache.jena.query.text.changes.TextQuadAction;
 import org.apache.lucene.index.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +155,7 @@ public class TextDocProducerBatch
 		s.reset(Mode.NONE, null);
 	}
 
-    @Override public void change( QuadAction qaction, Node g, Node s, Node p, Node o ) {
+    @Override public void change(TextQuadAction qaction, Node g, Node s, Node p, Node o ) {
         Quad quad = new Quad( g, s, p, o );
         switch( qaction ) {
             case ADD:

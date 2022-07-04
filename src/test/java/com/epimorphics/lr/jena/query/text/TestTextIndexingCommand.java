@@ -23,10 +23,10 @@ public class TestTextIndexingCommand extends SharedIndexTestSupport {
 
     private static final Logger log = LoggerFactory.getLogger( TestTextIndexingCommand.class );
 
-	@BeforeClass public static void runTextIndexer() throws IOException {	
+	@BeforeClass public static void runTextIndexer() throws IOException {
 		clearIndex();
 		clearTDB();
-		loadDataIntoDataset();        
+		loadDataIntoDataset();
 		clearIndex();
 		StoreConnection.expel( Location.create(TDB_TEST_ROOT), true );
 		textindexer.main("--desc", "src/test/resources/config-ppd-text.ttl");
