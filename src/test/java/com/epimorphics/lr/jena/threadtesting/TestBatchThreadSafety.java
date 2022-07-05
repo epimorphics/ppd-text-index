@@ -17,7 +17,10 @@ import org.apache.jena.query.text.Entity;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextHit;
 import org.apache.jena.query.text.TextIndex;
+import org.apache.jena.query.text.changes.TextQuadAction;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shared.Lock;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -66,17 +69,6 @@ public class TestBatchThreadSafety {
 			return null;
 		}
 
-//		@Override public List<TextHit> query(Node property, String qs, int limit) {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//
-//		@Override public List<TextHit> query(Node property, String qs) {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-
-		
 		static final EntityDefinition ed = new EntityDefinition
 			("URI", "fieldP", ResourceFactory.createResource("eh:/P"));
 			;
@@ -102,7 +94,27 @@ public class TestBatchThreadSafety {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
+
+		@Override
+		public List<TextHit> query(List<Resource> list, String s, String s1, String s2, int i, String s3) {
+			return null;
+		}
+
+		@Override
+		public List<TextHit> query(String s, List<Resource> list, String s1, String s2, String s3, int i, String s4) {
+			return null;
+		}
+
+		@Override
+		public List<TextHit> query(Node node, List<Resource> list, String s, String s1, String s2, int i, String s3) {
+			return null;
+		}
+
+		@Override
+		public List<TextHit> query(String subjectUri, Node property, String qs, String graphURI, String lang, int limit, String highlight) {
+			return TextIndex.super.query(subjectUri, property, qs, graphURI, lang, limit, highlight);
+		}
+
 	}
 	
 	static class DatasetGraphTesting implements DatasetGraph {
@@ -238,6 +250,11 @@ public class TestBatchThreadSafety {
 		}
 
 		@Override
+		public PrefixMap prefixes() {
+			return null;
+		}
+
+		@Override
 		public void begin(TxnType type) {
 			// TODO Auto-generated method stub
 			
@@ -346,18 +363,18 @@ public class TestBatchThreadSafety {
 					b.start();
 					if (ii[0] == 0) {
 //						System.err.println(">> updates");
-						b.change(QuadAction.ADD, G, S1, P, O1);
-						b.change(QuadAction.ADD, G, S1, P, O2);
-						b.change(QuadAction.ADD, G, S2, P, O3);
-						b.change(QuadAction.ADD, G, S2, P, O4);
-						b.change(QuadAction.ADD, G, S2, P, O5);
-						b.change(QuadAction.ADD, G, S2, P, O5);
+						b.change(TextQuadAction.ADD, G, S1, P, O1);
+						b.change(TextQuadAction.ADD, G, S1, P, O2);
+						b.change(TextQuadAction.ADD, G, S2, P, O3);
+						b.change(TextQuadAction.ADD, G, S2, P, O4);
+						b.change(TextQuadAction.ADD, G, S2, P, O5);
+						b.change(TextQuadAction.ADD, G, S2, P, O5);
 					//
 						for (int si = 0; si < SUBJECTS; si += 1) {	
 							Node s = NodeFactory.createURI("eh:/S" + si);				
 							for (int oi = 0; oi < OBJECTS; oi += 1) {
 								Node jo = NodeFactory.createLiteral("O" + oi, (String) null);
-								b.change(QuadAction.ADD, G, s, P, jo);
+								b.change(TextQuadAction.ADD, G, s, P, jo);
 							}
 						}
 					} else {

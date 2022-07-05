@@ -1,14 +1,8 @@
 package com.epimorphics.lr.jena.threadtesting;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.epimorphics.lr.jena.query.text.BatchState.Mode;
+import com.epimorphics.lr.jena.query.text.ExtendedEntity;
+import com.epimorphics.lr.jena.query.text.TextDocProducerBatch;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -19,17 +13,22 @@ import org.apache.jena.query.text.Entity;
 import org.apache.jena.query.text.EntityDefinition;
 import org.apache.jena.query.text.TextIndexConfig;
 import org.apache.jena.query.text.TextIndexLucene;
+import org.apache.jena.query.text.changes.TextQuadAction;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.QuadAction;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
 
-import com.epimorphics.lr.jena.query.text.BatchState.Mode;
-import com.epimorphics.lr.jena.query.text.ExtendedEntity;
-import com.epimorphics.lr.jena.query.text.TextDocProducerBatch;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestBatchBatching {
 
@@ -114,10 +113,10 @@ public class TestBatchBatching {
 		index.clearHistory();
 		base.begin(ReadWrite.WRITE);
 		b.start();
-		b.change(QuadAction.ADD, G, S1, P, O1);
-		b.change(QuadAction.ADD, G, S1, Q, O2);
-		b.change(QuadAction.ADD, G, S2, P, O2);
-		b.change(QuadAction.ADD, G, S2, Q, O1);
+		b.change(TextQuadAction.ADD, G, S1, P, O1);
+		b.change(TextQuadAction.ADD, G, S1, Q, O2);
+		b.change(TextQuadAction.ADD, G, S2, P, O2);
+		b.change(TextQuadAction.ADD, G, S2, Q, O1);
 		b.finish();
 		base.commit();
 		base.end();
@@ -143,8 +142,8 @@ public class TestBatchBatching {
 		index.clearHistory();
 		base.begin(ReadWrite.WRITE);
 		b.start();
-		b.change(QuadAction.ADD, G, S1, P, O1);
-		b.change(QuadAction.DELETE, G, S2, Q, O2);
+		b.change(TextQuadAction.ADD, G, S1, P, O1);
+		b.change(TextQuadAction.DELETE, G, S2, Q, O2);
 		b.finish();
 		base.commit();
 		base.end();		

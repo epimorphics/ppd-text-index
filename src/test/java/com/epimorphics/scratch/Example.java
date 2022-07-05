@@ -6,6 +6,7 @@ import org.apache.jena.query.text.TextDocProducerTriples;
 import org.apache.jena.query.text.TextIndex;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.text.changes.TextQuadAction;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.QuadAction;
@@ -19,8 +20,8 @@ public class Example extends TextDocProducerTriples {
 		this.dg = dg;
 	}
 	
-	public void change(QuadAction qaction, Node g, Node s, Node p, Node o) {
-		if (qaction == QuadAction.ADD) {
+	public void change(TextQuadAction qaction, Node g, Node s, Node p, Node o) {
+		if (qaction == TextQuadAction.ADD) {
 			if (alreadyHasOne(s, p)) super.change(qaction, g, s, p, o);
 		}
 	}
