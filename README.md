@@ -1,4 +1,11 @@
-# conjunctive queries - Jena-686 and PPD text index 
+# Support for conjunctive fielded test queries
+
+| Version | Branch | Compatiblity |
+|---|---|---|
+| 3.0.0 | jena3 | Supports jena 3.12.0 and later jena 3.x versions |
+| 4.0.0 | master | Supports jena 4.x versions |
+
+## Issue and approach 
 
 In JENA-686 (https://issues.apache.org/jira/browse/JENA-686)
 we explain a problem we had with doing text search on
