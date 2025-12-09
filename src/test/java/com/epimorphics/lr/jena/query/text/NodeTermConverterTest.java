@@ -16,11 +16,11 @@ package com.epimorphics.lr.jena.query.text;
 // Imports
 ///////////////
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.jena.query.text.TextIndexException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,27 +53,31 @@ public class NodeTermConverterTest
 
     /***********************************/
     /* Constructors                    */
-    /***********************************/
+    /**********************************/
 
     /***********************************/
     /* External signature methods      */
     /***********************************/
 
-    @Before
+    @BeforeEach
     public void setUp() {
         l = ResourceFactory.createPlainLiteral( "foo" ).asNode();
         r = ResourceFactory.createResource( "http://test/foo" ).asNode();
         a = ResourceFactory.createResource().asNode();
     }
 
-    @Test (expected=IllegalArgumentException.class )
+    @Test
     public void testSubjectToTerm0() {
-        NodeTermConverter.subjectToTerm( null );
+        assertThrows(IllegalArgumentException.class, () -> {
+            NodeTermConverter.subjectToTerm(null);
+        });
     }
 
-    @Test (expected=TextIndexException.class )
+    @Test
     public void testSubjectToTerm1() {
-        NodeTermConverter.subjectToTerm( l );
+        assertThrows(TextIndexException.class, () -> {
+            NodeTermConverter.subjectToTerm( l );
+        });
     }
 
     @Test
@@ -87,9 +91,11 @@ public class NodeTermConverterTest
         assertNull( NodeTermConverter.graphNodeToTerm( null ) );
     }
 
-    @Test (expected=TextIndexException.class )
+    @Test
     public void testGraphNodeToTerm1() {
-        NodeTermConverter.graphNodeToTerm( l );
+        assertThrows(TextIndexException.class, () -> {
+            NodeTermConverter.graphNodeToTerm( l );
+        });
     }
 
     @Test
@@ -121,4 +127,3 @@ public class NodeTermConverterTest
     /***********************************/
 
 }
-

@@ -16,10 +16,10 @@ package com.epimorphics.lr.jena.query.text;
 // Imports
 ///////////////
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.jena.query.text.EntityDefinition;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,16 +74,16 @@ public class ExtendedEntityTest
         assertEquals( "http://test.com/g", xe.getGraph() );
     }
 
-    @Test (expected=NotSuitableForIndexingException.class)
+    @Test
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_1() {
         // resource o is not suitable for indexing
-        new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, o );
+        assertThrows(NotSuitableForIndexingException.class, () -> new ExtendedEntity(ed_withG, Mode.NONE, g, s, p, o));
     }
 
-    @Test (expected=NotSuitableForIndexingException.class)
+    @Test
     public void testExtendedEntityEntityDefinitionNodeNodeNodeNode_2() {
         // no field for l
-        new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, l );
+        assertThrows(NotSuitableForIndexingException.class, () -> new ExtendedEntity( ed_withG, Mode.NONE, g, s, p, l ));
     }
 
     @Test
@@ -93,16 +93,18 @@ public class ExtendedEntityTest
         assertEquals( "foo", xe.get( "foo_field" ));
     }
 
-    @Test (expected=NotSuitableForIndexingException.class)
+    @Test
     public void testExtendedEntityEntityDefinitionQuad_1() {
-        Quad q = new Quad( g, s, p, o );
-        new ExtendedEntity( ed_withG, Mode.NONE, q );
+        Quad q = new Quad(g, s, p, o);
+        assertThrows(NotSuitableForIndexingException.class,
+                () -> new ExtendedEntity(ed_withG, Mode.NONE, q));
     }
 
-    @Test (expected=NotSuitableForIndexingException.class)
+    @Test
     public void testExtendedEntityEntityDefinitionQuad_2() {
         Quad q = new Quad( g, s, p, l );
-        new ExtendedEntity( ed_withG, Mode.NONE, q );
+        assertThrows(NotSuitableForIndexingException.class,
+                () -> new ExtendedEntity( ed_withG, Mode.NONE, q ));
     }
 
     @Test
@@ -129,4 +131,3 @@ public class ExtendedEntityTest
         assertEquals( "foo", xe.get( "foo_field" ));
     }
 }
-

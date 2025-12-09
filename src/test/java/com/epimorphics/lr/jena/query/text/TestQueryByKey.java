@@ -8,7 +8,7 @@ import org.apache.jena.query.text.TextIndexConfig;
 import org.apache.jena.query.text.TextIndexLucene;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestQueryByKey {
 

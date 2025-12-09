@@ -19,8 +19,9 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.update.UpdateAction;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
     IntegrationBase contains constants and code used by FunctionalText
@@ -45,7 +46,7 @@ public class SharedIndexTestSupport {
     
     public void testQueryPostcodeCount( String sparql, String expectedPostcode, int expectedHits ) {
         ResultSet results = queryData( ds, loadQuery( TEST_RESOURCES + sparql ) );
-        assertTrue( "Query failed to return any results", results.hasNext() );
+        assertTrue( results.hasNext(), "Query failed to return any results" );
 
         int n = 0;
         boolean seenPostcode = false;
@@ -59,8 +60,8 @@ public class SharedIndexTestSupport {
             seenPostcode = seenPostcode || (postcode != null && postcode.equals( expectedPostcode ));
         }
 
-        assertTrue( "Expected to see postcode " + expectedPostcode, seenPostcode );
-        assertEquals( "Expected " + expectedHits + " results", expectedHits, n );
+        assertTrue( seenPostcode, "Expected to see postcode " + expectedPostcode);
+        assertEquals( expectedHits, n, "Expected " + expectedHits + " results");
     }
     
     /**
@@ -69,7 +70,7 @@ public class SharedIndexTestSupport {
     public String loadQuery( String queryFile ) {
         try {
             File file = new File( queryFile );
-            assertTrue( "Query file does not exist: " + queryFile, file.exists() );
+            assertTrue( file.exists(), "Query file does not exist: " + queryFile);
 
             return FileUtils.readFileToString( file );
         }

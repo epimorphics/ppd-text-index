@@ -2,8 +2,8 @@ package com.epimorphics.lr.jena.query.text;
 
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.Reader;
@@ -14,10 +14,7 @@ import java.util.Set;
 import org.apache.jena.atlas.lib.StrUtils;
 import org.apache.jena.query.text.DatasetGraphText;
 import org.apache.jena.query.text.assembler.TextAssembler;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +93,7 @@ public class TestDatasetWithBatchProducer {
                     );
     }
 
-    @Before
+    @BeforeEach
     public void init() {
         Reader reader = new StringReader(SPEC);
         Model specModel = ModelFactory.createDefaultModel();
@@ -108,7 +105,7 @@ public class TestDatasetWithBatchProducer {
         dataset = (Dataset) Assembler.general.open(root);
     }
     
-    @After 
+    @AfterEach
     public void closeDataset() {
     	if (dataset == null) {
     		log.warn("dataset was not set up");
@@ -117,7 +114,7 @@ public class TestDatasetWithBatchProducer {
     	}
     }
 
-    @AfterClass
+    @AfterAll
     public static void deleteOldFiles() {
         if (indexDir.exists()) {
             emptyAndDeleteDirectory(indexDir);
@@ -251,17 +248,18 @@ public class TestDatasetWithBatchProducer {
 
     private static void doTestQuery(Dataset dataset, String label, String queryString, Set<String> expectedEntityURIs, int expectedNumResults) {
         Query query = QueryFactory.create(queryString) ;
-        QueryExecution qexec = QueryExecutionFactory.create(query, dataset) ;
-        try {
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, dataset)) {
             dataset.begin(ReadWrite.READ);
-            ResultSet results = qexec.execSelect() ;
+            ResultSet results = qexec.execSelect();
 
             int count;
-            for (count=0; results.hasNext(); count++) {
+            for (count = 0; results.hasNext(); count++) {
                 String entityURI = results.next().getResource("s").getURI();
-                assertTrue(label + ": unexpected result: " + entityURI, expectedEntityURIs.contains(entityURI));
+                assertTrue(expectedEntityURIs.contains(entityURI), label + ": unexpected result: " + entityURI);
             }
-            assertEquals(label, expectedNumResults, count);
-        } finally { qexec.close() ; dataset.end() ; }
+            assertEquals(expectedNumResults, count, label);
+        } finally {
+            dataset.end();
+        }
     }
 }

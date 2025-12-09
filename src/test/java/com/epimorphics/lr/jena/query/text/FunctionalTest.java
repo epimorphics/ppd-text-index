@@ -15,7 +15,10 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.query.text.TextQuery;
 import org.apache.jena.riot.RDFDataMgr;
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +44,13 @@ public class FunctionalTest extends SharedIndexTestSupport {
     /***********************************/
 
     /** Ensure assembler initialized. */
-    @BeforeClass
+    @BeforeAll
     public static void setupClass() {
         TextQuery.init() ;
     }
 
     /** Reset the TDB dataset each time by deleting and reloading */
-    @Before
+    @BeforeEach
     public void resetTDB() {
         log.debug( "Reset TDB" );
         StoreConnection.expel( Location.create(TDB_TEST_ROOT), true );
@@ -74,7 +77,7 @@ public class FunctionalTest extends SharedIndexTestSupport {
         ds = loadDataset( ASSEMBLER_CONFIG, PPD_BASE_TEST_DATA );
     }
     
-    @After 
+    @AfterEach
     public void closeDataset() {
     	ds.close();
     }
