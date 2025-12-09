@@ -3,10 +3,15 @@
   <groupId>com.epimorphics.lr</groupId>
   <version>4.0.1-SNAPSHOT</version>
 
+  <scm>
+    <developerConnection>scm:git:ssh://git@github.com/epimorphics/ppd-text-index.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <jdk.version>1.8</jdk.version>
     <targetJdk>${jdk.version}</targetJdk>
-    <ver.wagon>2.2</ver.wagon>
+    <ver.wagon>2.10</ver.wagon>
     <jena.version>4.6.1</jena.version>
   </properties>
 
@@ -82,9 +87,20 @@
 
   <distributionManagement>
     <repository>
-      <id>epi-public-repo</id>
-      <url>ftp://repository.epimorphics.com</url>
+      <id>epi-public-s3-release</id>
+      <name>Epimorphics S3 release repository</name>
+      <url>s3://epi-repository/release</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
+
+    <snapshotRepository>
+      <id>epi-public-s3-snapshot</id>
+      <name>Epimorphics S3 snapshot repository</name>
+      <url>s3://epi-repository/snapshot</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </snapshotRepository>
   </distributionManagement>
 
   <repositories>
@@ -123,17 +139,17 @@
   <artifactId>ppd-text-index</artifactId>
   <build>
     <pluginManagement>
-	<plugins>
+	    <plugins>
 
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-surefire-plugin</artifactId>
-		    <version>3.5.4</version>
-		    <configuration>
-		        <reuseForks>false</reuseForks>
-		        <forkCount>1</forkCount>
-		    </configuration>
-		</plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.5.4</version>
+            <configuration>
+                <reuseForks>false</reuseForks>
+                <forkCount>1</forkCount>
+            </configuration>
+        </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -157,6 +173,21 @@
           </configuration>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-scm-plugin</artifactId>
+          <version>2.2.1</version>
+          <configuration>
+            <connectionType>developerConnection</connectionType>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+
       </plugins>
 
     </pluginManagement>
@@ -167,8 +198,13 @@
         <artifactId>wagon-ftp</artifactId>
         <version>${ver.wagon}</version>
       </extension>
+      <extension>
+        <groupId>org.springframework.build</groupId>
+        <artifactId>aws-maven</artifactId>
+        <version>5.0.0.RELEASE</version>
+      </extension>
     </extensions>
 
-
   </build>
+
 </project>
