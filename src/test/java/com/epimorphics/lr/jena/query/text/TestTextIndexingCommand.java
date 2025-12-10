@@ -7,10 +7,10 @@ import lr.textindexer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.query.text.TextQuery;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class TestTextIndexingCommand extends SharedIndexTestSupport {
 
     private static final Logger log = LoggerFactory.getLogger( TestTextIndexingCommand.class );
 
-	@BeforeClass public static void runTextIndexer() throws IOException {
+	@BeforeAll public static void runTextIndexer() throws IOException {
 		clearIndex();
 		clearTDB();
 		loadDataIntoDataset();
@@ -44,11 +44,11 @@ public class TestTextIndexingCommand extends SharedIndexTestSupport {
         tdbDir.mkdir();
 	}
 	
-	@Before public void openDataset() {
+	@BeforeEach public void openDataset() {
         ds = assembleDataset();
 	}
 	
-	@After public void closeDataset() {
+	@AfterEach public void closeDataset() {
 		if (ds == null) {
 			log.warn("Dataset was null");
 		} else {

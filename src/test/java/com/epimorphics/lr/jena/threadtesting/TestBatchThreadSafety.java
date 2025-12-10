@@ -1,7 +1,5 @@
 package com.epimorphics.lr.jena.threadtesting;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,10 +22,9 @@ import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shared.Lock;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.QuadAction;
 import org.apache.jena.sparql.util.Context;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.epimorphics.lr.jena.query.text.TextDocProducerBatch;
 
@@ -343,7 +340,8 @@ public class TestBatchThreadSafety {
 	
 	boolean retain = false;
 	
-	@Test @Ignore public void testDoesNotRetainGarbage() throws InterruptedException {
+	@Test @Disabled
+	public void testDoesNotRetainGarbage() throws InterruptedException {
 		TextIndex ti = new TextIndexTesting();
 		DatasetGraph dsg = new DatasetGraphTesting();
 		final TextDocProducerBatch b = new TextDocProducerBatch(dsg, ti);

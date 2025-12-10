@@ -1,13 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.epimorphics.lr</groupId>
-  <version>4.0.0</version>
+  <version>4.0.1-SNAPSHOT</version>
+
+  <scm>
+    <developerConnection>scm:git:ssh://git@github.com/epimorphics/ppd-text-index.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
-    <jdk.version>1.8</jdk.version>
+    <jdk.version>11</jdk.version>
     <targetJdk>${jdk.version}</targetJdk>
-    <ver.wagon>2.2</ver.wagon>
-    <jena.version>4.5.0</jena.version>
+    <ver.wagon>2.10</ver.wagon>
+    <jena.version>4.6.1</jena.version>
   </properties>
 
   <dependencies>
@@ -26,53 +31,107 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-      <type>jar</type>
-      <scope>provided</scope>
-  </dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.12.2</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.21</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.15.3</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.15.3</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>3.25.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.21.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.26.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <distributionManagement>
     <repository>
-      <id>epi-public-repo</id>
-      <url>ftp://repository.epimorphics.com</url>
+      <id>epi-public-s3-release</id>
+      <name>Epimorphics S3 release repository</name>
+      <url>s3://epi-repository/release</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
+
+    <snapshotRepository>
+      <id>epi-public-s3-snapshot</id>
+      <name>Epimorphics S3 snapshot repository</name>
+      <url>s3://epi-repository/snapshot</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </snapshotRepository>
   </distributionManagement>
 
   <repositories>
 
     <repository>
-      <id>epi-public-repo</id>
-      <name>Epimorphics Public Repository</name>
-      <url>http://repository.epimorphics.com</url>
-      <layout>default</layout>
+      <id>epi-public-s3-release</id>
+      <name>Epimorphics S3 release repository</name>
+      <url>https://epi-repository.s3-eu-west-1.amazonaws.com/release</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+
+    <repository>
+      <id>epi-public-s3-snapshot</id>
+      <name>Epimorphics S3 snapshot repository</name>
+      <url>https://epi-repository.s3-eu-west-1.amazonaws.com/snapshot</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>https://repository.apache.org/snapshots</url>
       <releases>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
     </repository>
-
-     <repository>
-          <id>apache.snapshots</id>
-          <name>Apache Snapshot Repository</name>
-          <url>https://repository.apache.org/snapshots</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository> 
 
   </repositories>
 
@@ -80,17 +139,17 @@
   <artifactId>ppd-text-index</artifactId>
   <build>
     <pluginManagement>
-	<plugins>
+	    <plugins>
 
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-surefire-plugin</artifactId>
-		    <version>2.16</version>
-		    <configuration>
-		        <reuseForks>false</reuseForks>
-		        <forkCount>1</forkCount>
-		    </configuration>
-		</plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.5.4</version>
+            <configuration>
+                <reuseForks>false</reuseForks>
+                <forkCount>1</forkCount>
+            </configuration>
+        </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -114,6 +173,21 @@
           </configuration>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-scm-plugin</artifactId>
+          <version>2.2.1</version>
+          <configuration>
+            <connectionType>developerConnection</connectionType>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+
       </plugins>
 
     </pluginManagement>
@@ -124,8 +198,13 @@
         <artifactId>wagon-ftp</artifactId>
         <version>${ver.wagon}</version>
       </extension>
+      <extension>
+        <groupId>org.springframework.build</groupId>
+        <artifactId>aws-maven</artifactId>
+        <version>5.0.0.RELEASE</version>
+      </extension>
     </extensions>
 
-
   </build>
+
 </project>
