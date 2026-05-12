@@ -22,13 +22,7 @@
       <artifactId>apache-jena-libs</artifactId>
       <version>${jena.version}</version>
       <type>pom</type>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.thrift</groupId>
-          <artifactId>libthrift</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency> 
+    </dependency>
 
     <dependency>
       <groupId>org.apache.jena</groupId>
