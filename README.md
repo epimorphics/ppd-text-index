@@ -1,9 +1,9 @@
 # Support for conjunctive fielded test queries
 
 | Version | Branch | Compatiblity |
-|---|---|---|
-| 3.0.0 | jena3 | Supports jena 3.12.0 and later jena 3.x versions |
-| 4.0.0 | master | Supports jena 4.x versions |
+|---------|--------|---|
+| 3.0.0   | jena3  | Supports jena 3.12.0 and later jena 3.x versions |
+| 4.0.*   | main   | Supports jena 4.x versions |
 
 ## Issue and approach 
 
