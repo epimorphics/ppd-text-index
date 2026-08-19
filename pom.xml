@@ -37,11 +37,34 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>0.23.0</version>
+      <version>0.24.0</version>
+        <exclusions>
+            <exclusion>
+                <artifactId>httpclient5</artifactId>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+            </exclusion>
+            <exclusion>
+                <artifactId>httpcore5</artifactId>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+            </exclusion>
+        </exclusions>
     </dependency>
+
+      <dependency>
+          <groupId>org.apache.httpcomponents.client5</groupId>
+          <artifactId>httpclient5</artifactId>
+          <version>5.6.4</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.httpcomponents.core5</groupId>
+          <artifactId>httpcore5</artifactId>
+          <version>5.4.3</version>
+      </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -53,6 +76,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+        <version>2.21.0</version>
     </dependency>
 
     <dependency>
