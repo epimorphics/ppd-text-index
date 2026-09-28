@@ -13,7 +13,7 @@
     <targetJdk>${jdk.version}</targetJdk>
     <ver.wagon>2.10</ver.wagon>
     <jena.version>4.6.1</jena.version>
-      <jackson.version>2.22.1</jackson.version>
+      <jackson.version>2.22.2</jackson.version>
       <logback.version>1.5.38</logback.version>
   </properties>
 
